@@ -18,11 +18,17 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-//agregr iconos a usasr
   'map.fill': 'map',
   'person.2.fill': 'people',
   'message.fill': 'chat',
   'person.crop.circle.fill': 'person',
+  
+  // ÍCONOS AGREGADOS PARA CALENDARIO Y CANDIDATOS
+  'calendar': 'event', // Para Calendario
+  'calendar.circle.fill': 'event-note', // Alternativa para Calendario
+  'person.3.fill': 'groups', // Para Candidatos
+  'people.fill': 'group', // Alternativa para Candidatos
+  'account.box.fill': 'account-box', // Otra alternativa
 } as IconMapping;
 
 /**

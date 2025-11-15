@@ -27,6 +27,88 @@ export default function LoginScreen() {
     setLoading(true);
     setErrorMsg('');
 
+    // =========================================================
+    // 🧪 INICIO DE SIMULACIÓN PARA PRUEBAS (AJUSTADO A TU ESTRUCTURA) 🧪
+    // Usa 'frank1', 'frank2', 'frank3' con password '123'
+    // =========================================================
+    if (password === '123' && (document === 'frank1' || document === 'frank2' || document === 'frank3' || document === 'admin')) {
+      let role_member_key = null;
+
+      if (document === 'frank1') {
+        role_member_key = 'citizen';
+      } else if (document === 'frank2') {
+        role_member_key = 'mesa_member';
+      } else if (document === 'frank3') {
+        role_member_key = 'party_representative';
+      } else if (document === 'admin') {
+        // Simulación para probar el ADMIN
+        role_member_key = 'ADMIN';
+      }
+
+      if (role_member_key) {
+        
+        // Simular un retraso de red
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        const data = {
+          access_token: 'fake-access-token-123',
+          refresh_token: 'fake-refresh-token-123',
+          user: {
+            email: `${document}@test.com`,
+            roleable_type: role_member_key === 'ADMIN' ? 'Admin' : 'Member',
+            roleable: {
+              // Aseguramos que solo los miembros tengan el sub-rol
+              role_member: role_member_key === 'ADMIN' ? undefined : role_member_key,
+            },
+          },
+        };
+
+        await SecureStore.setItemAsync('access_token', data.access_token);
+        await SecureStore.setItemAsync('refresh_token', data.refresh_token);
+        await SecureStore.setItemAsync('user', JSON.stringify(data.user));
+
+        if (keepLoggedIn) {
+          await SecureStore.setItemAsync('keep_logged_in', 'true');
+        }
+
+        setLoading(false);
+
+        // LÓGICA DE REDIRECCIÓN BASADA EN LA SIMULACIÓN
+        const user = data.user;
+        
+        if (user.roleable_type === 'Admin' || role_member_key === 'ADMIN') {
+          router.replace('/(admin)');
+        } else {
+          const memberRole = user.roleable?.role_member; // Sub-rol del Miembro
+          
+          switch (memberRole) {
+            case 'citizen':
+              // ✅ Redirige a la carpeta del rol (que mostrará las tabs y su contenido específico)
+              router.replace('/(member)/citizen');
+              break;
+            case 'mesa_member':
+              // ✅ Redirige a la carpeta del rol
+              router.replace('/(member)/mesa-member');
+              break;
+            case 'party_representative':
+              // ✅ Redirige a la carpeta del rol
+              router.replace('/(member)/party-representative');
+              break;
+            default:
+              // Fallback si el rol no se reconoce
+              router.replace('/(tabs)');
+              break;
+          }
+        }
+        return; // IMPORTANTE: Termina la función aquí para evitar la llamada a la API real
+      }
+    }
+    // =========================================================
+    //  FIN DE SIMULACIÓN PARA PRUEBAS 
+    // =========================================================
+
+
+    // ➜ INICIO DEL CÓDIGO REAL DE LA API
     try {
       const response = await fetch("http://10.0.2.2:3000/api/v1/general/users/sign_in", {
         method: "POST",
@@ -49,7 +131,6 @@ export default function LoginScreen() {
 
       await SecureStore.setItemAsync("access_token", data.access_token);
       await SecureStore.setItemAsync("refresh_token", data.refresh_token);
-
       await SecureStore.setItemAsync("user", JSON.stringify(data.user));
 
       // ➜ Guardar flag si marcó "mantener sesión"
@@ -58,11 +139,35 @@ export default function LoginScreen() {
       }
 
       setLoading(false);
-      if (data.user.role_type === "ADMIN") {
-        router.replace("/(admin)");
+      
+      // ----------------------------------------------------------------------
+      // ✅ LÓGICA DE REDIRECCIÓN BASADA EN EL ROL DE LA API REAL
+      // ----------------------------------------------------------------------
+      const user = data.user;
+
+      if (user.roleable_type === 'Admin' || user.role_type === 'ADMIN') {
+          router.replace('/(admin)');
       } else {
-        router.replace("/(tabs)");
+          const memberRole = user.roleable?.role_member; // Sub-rol del Miembro
+
+          switch (memberRole) {
+              case 'citizen':
+                  router.replace('/(member)/citizen'); 
+                  break;
+              case 'mesa_member':
+                  router.replace('/(member)/mesa-member');
+                  break;
+              case 'party_representative':
+                  router.replace('/(member)/party-representative');
+                  break;
+              default:
+                  // Fallback si el rol no se reconoce
+                  router.replace('/(tabs)');
+                  break;
+          }
       }
+      // ----------------------------------------------------------------------
+      
     } catch (error) {
       setLoading(false);
       setErrorMsg("Error de conexión");
@@ -77,7 +182,8 @@ export default function LoginScreen() {
           <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
             {/* Título y logo */}
             <Text style={styles.title}>Bienvenido</Text>
-            <Image source={require('@/assets/images/favicon.png')} style={styles.logo} resizeMode="contain" />
+            {/* Reemplaza con la ruta de tu logo real */}
+            <Image source={require('@/assets/images/favicon.png')} style={styles.logo} resizeMode="contain" /> 
             <Text style={styles.subtitle}>Ingresa tus credenciales</Text>
 
             {/* Formulario */}

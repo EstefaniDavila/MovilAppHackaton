@@ -1,98 +1,454 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import React, { useState } from 'react';
+import { StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Image, View, Text } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { Colors } from '@/constants/colors';
 
-export default function HomeScreen() {
+// Interfaces TypeScript
+interface NewsItem {
+  id: number;
+  title: string;
+  source: string;
+  date: string;
+  image: string;
+  isOfficial: boolean;
+  category?: string;
+}
+
+interface NewsCardProps {
+  news: NewsItem;
+}
+
+// Datos simulados de noticias mejorados
+const MOCK_NEWS: NewsItem[] = [
+  { 
+    id: 1, 
+    title: 'Corte Electoral ratifica el calendario de elecciones para el próximo mes', 
+    source: 'Organismo Electoral Oficial', 
+    date: 'Hace 5 min', 
+    image: 'https://placehold.co/600x400/000B29/F8F5F2?text=Oficial',
+    isOfficial: true,
+    category: 'OFICIAL'
+  },
+  { 
+    id: 2, 
+    title: 'Análisis: El impacto de las propuestas económicas en el mercado local', 
+    source: 'El Diario El Comercio', 
+    date: 'Hace 2 horas', 
+    image: 'https://placehold.co/600x400/D70026/F8F5F2?text=Comercio',
+    isOfficial: false,
+    category: 'ANÁLISIS'
+  },
+  { 
+    id: 3, 
+    title: 'Tutorial: Así puedes verificar tu mesa de votación y local exacto', 
+    source: 'Organismo Electoral Oficial', 
+    date: 'Hace 1 día', 
+    image: 'https://placehold.co/600x400/EDB83D/000B29?text=Tutorial',
+    isOfficial: true,
+    category: 'GUÍA'
+  },
+  { 
+    id: 4, 
+    title: 'Resultados preliminares muestran tendencia en encuestas nacionales', 
+    source: 'Centro de Estudios Electorales', 
+    date: 'Hace 3 horas', 
+    image: 'https://placehold.co/600x400/6b7280/FFFFFF?text=Encuestas',
+    isOfficial: false,
+    category: 'ENCUESTAS'
+  },
+];
+
+// Componente Card de Noticia mejorado
+const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
+  const getCategoryColor = () => {
+    switch (news.category) {
+      case 'OFICIAL':
+        return Colors.primary;
+      case 'ANÁLISIS':
+        return Colors.secondary;
+      case 'GUÍA':
+        return Colors.night;
+      case 'ENCUESTAS':
+        return Colors.gray;
+      default:
+        return Colors.primary;
+    }
+  };
+
+  const getCategoryTextColor = () => {
+    return news.category === 'ANÁLISIS' ? Colors.night : Colors.pearl;
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <TouchableOpacity 
+      style={styles.card}
+      activeOpacity={0.9}
+      onPress={() => console.log('Abrir noticia:', news.title)}
+    >
+      {/* Imagen con overlay */}
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: news.image }} style={styles.cardImage} />
+        <View style={styles.imageOverlay} />
+        
+        {/* Badge superpuesto en la imagen */}
+        <View style={[styles.floatingBadge, { backgroundColor: getCategoryColor() }]}>
+          <ThemedText style={[styles.floatingBadgeText, { color: getCategoryTextColor() }]}>
+            {news.category}
+          </ThemedText>
+        </View>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
+      <View style={styles.cardContent}>
+        {/* Header con fuente y fecha */}
+        <View style={styles.headerRow}>
+          <View style={styles.sourceContainer}>
+            <ThemedText style={styles.sourceText}>{news.source}</ThemedText>
+            {news.isOfficial && (
+              <View style={styles.verifiedDot} />
+            )}
+          </View>
+          <ThemedText style={styles.dateText}>{news.date}</ThemedText>
+        </View>
+        
+        {/* Título */}
+        <ThemedText type="subtitle" style={styles.cardTitle} numberOfLines={3}>
+          {news.title}
         </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+
+        {/* Footer con indicador de lectura - CORREGIDO */}
+        <View style={styles.cardFooter}>
+          <View style={styles.readIndicator}>
+            <ThemedText style={styles.readText}>Leer más</ThemedText>
+            <Text style={styles.arrow}>→</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Borde inferior de acento */}
+      <View style={[styles.cardBorder, { backgroundColor: getCategoryColor() }]} />
+    </TouchableOpacity>
+  );
+};
+
+export default function NewsScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
+
+  return (
+    <ThemedView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            tintColor={Colors.primary}
+            colors={[Colors.primary]}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header completamente rediseñado */}
+        <View style={styles.header}>
+          <View style={styles.headerBackground} />
+          <View style={styles.headerContent}>
+            <View style={styles.titleRow}>
+              <View style={styles.iconContainer}>
+                <Text style={styles.icon}>📰</Text>
+              </View>
+              <View style={styles.titleContainer}>
+                <ThemedText type="title" style={styles.mainTitle}>
+                  Noticias Electorales
+                </ThemedText>
+                <ThemedText style={styles.subtitle}>
+                  Información verificada y actualizada
+                </ThemedText>
+              </View>
+            </View>
+            
+            <View style={styles.statsContainer}>
+              <View style={styles.newsCounter}>
+                <ThemedText style={styles.newsCounterNumber}>{MOCK_NEWS.length}</ThemedText>
+                <ThemedText style={styles.newsCounterLabel}>noticias</ThemedText>
+              </View>
+              <View style={styles.liveIndicator}>
+                <View style={styles.liveDot} />
+                <ThemedText style={styles.liveText}>En vivo</ThemedText>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Lista de noticias */}
+        <View style={styles.newsList}>
+          {MOCK_NEWS.map((news) => (
+            <NewsCard key={news.id} news={news} />
+          ))}
+        </View>
+
+        {/* Footer mejorado */}
+        <View style={styles.footer}>
+          <View style={styles.footerContent}>
+            <ThemedText style={styles.footerText}>
+              Desliza hacia abajo para actualizar
+            </ThemedText>
+            <View style={styles.footerSources}>
+              <ThemedText style={styles.footerSourceText}>
+                Fuentes verificadas • Actualizado hace 5 min
+              </ThemedText>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: Colors.pearl,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  // Header completamente rediseñado
+  header: {
+    position: 'relative',
+    paddingTop: 60,
+    paddingBottom: 24,
+    backgroundColor: Colors.night,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  headerBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: Colors.secondary,
+  },
+  headerContent: {
+    paddingHorizontal: 24,
+  },
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 20,
   },
-  stepContainer: {
-    gap: 8,
+  iconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+    elevation: 8,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  icon: {
+    fontSize: 24,
+    color: Colors.pearl,
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  mainTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: Colors.pearl,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: Colors.pearl + 'CC',
+    fontWeight: '500',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  newsCounter: {
+    alignItems: 'center',
+  },
+  newsCounterNumber: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: Colors.primary,
+    marginBottom: 2,
+  },
+  newsCounterLabel: {
+    fontSize: 14,
+    color: Colors.pearl + 'CC',
+    fontWeight: '600',
+  },
+  liveIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primary + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.primary + '40',
+  },
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
+    marginRight: 6,
+  },
+  liveText: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '700',
+  },
+  newsList: {
+    paddingHorizontal: 20,
+    gap: 20,
+    marginTop: 8,
+  },
+  card: {
+    backgroundColor: Colors.pearl,
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 6,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+  },
+  imageContainer: {
+    position: 'relative',
+  },
+  cardImage: {
+    width: '100%',
+    height: 200,
+  },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 11, 41, 0.05)',
+  },
+  floatingBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  floatingBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  cardContent: {
+    padding: 20,
+    gap: 12,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  sourceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  sourceText: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  verifiedDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.primary,
+    marginLeft: 6,
+  },
+  dateText: {
+    fontSize: 13,
+    color: Colors.gray,
+    fontWeight: '500',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.night,
+    lineHeight: 24,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  readIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: Colors.night + '08',
+  },
+  readText: {
+    fontSize: 13,
+    color: Colors.night,
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  arrow: {
+    fontSize: 14,
+    color: Colors.night,
+    fontWeight: '600',
+  },
+  cardBorder: {
+    height: 3,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+    marginTop: 20,
+  },
+  footerContent: {
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 14,
+    color: Colors.gray,
+    fontWeight: '500',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  footerSources: {
+    alignItems: 'center',
+  },
+  footerSourceText: {
+    fontSize: 12,
+    color: Colors.gray,
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });
