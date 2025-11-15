@@ -57,12 +57,12 @@ export default function LoginScreen() {
         await SecureStore.setItemAsync("keep_logged_in", "true");
       }
 
-      if (keepLoggedIn) {
-        await SecureStore.setItemAsync("keep_logged_in", "true");
-      }
-
       setLoading(false);
-      router.replace("/(tabs)");
+      if (data.user.role_type === "ADMIN") {
+        router.replace("/(admin)");
+      } else {
+        router.replace("/(tabs)");
+      }
     } catch (error) {
       setLoading(false);
       setErrorMsg("Error de conexión");
