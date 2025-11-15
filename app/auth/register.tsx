@@ -1,26 +1,29 @@
+import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator, Alert, Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RegisterScreen() {
+  const [first_name, setFirstName] = useState('');
+  const [last_name, setLastName] = useState('');
+  const [gender, setGender] = useState();
   const [email, setEmail] = useState('');
   const [document, setDocument] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPass, setConfirmPass] = useState('');
+  // const [password, setPassword] = useState('');
+  // const [confirmPass, setConfirmPass] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -28,27 +31,30 @@ export default function RegisterScreen() {
     setLoading(true);
     setErrorMsg('');
 
-    if (!email || !document || !password || !confirmPass) {
+    if (!email || !document || !first_name || !last_name) {
       setLoading(false);
       setErrorMsg("Todos los campos son obligatorios");
       return;
     }
 
-    if (password !== confirmPass) {
-      setLoading(false);
-      setErrorMsg("Las contraseñas no coinciden");
-      return;
-    }
+    // if (password !== confirmPass) {
+    //   setLoading(false);
+    //   setErrorMsg("Las contraseñas no coinciden");
+    //   return;
+    // }
 
     try {
-      const response = await fetch("http://127.0.0.1:3000/api/v1/general/users/auth/sign_up", {
+      const response = await fetch("http://10.0.2.2:3000/api/v1/general/users/sign_up", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          first_name,
+          last_name,
+          gender,
           email,
-          document_number: document,
-          password,
-          password_confirmation: confirmPass,
+          document_number: document
+          // password,
+          // password_confirmation: confirmPass,
         }),
       });
 
@@ -63,7 +69,14 @@ export default function RegisterScreen() {
       await SecureStore.setItemAsync("access_token", data.access_token);
       await SecureStore.setItemAsync("refresh_token", data.refresh_token);
       setLoading(false);
-      router.replace("/(tabs)");
+
+      Alert.alert(
+        "Registro exitoso",
+        "No olvides cambiar tu contraseña desde la pestaña Perfil.",
+        [
+          { text: "Ok", onPress: () => router.replace("/(tabs)") }
+        ]
+      );
     } catch (error) {
       setLoading(false);
       setErrorMsg("Error de conexión");
@@ -86,6 +99,26 @@ export default function RegisterScreen() {
             {/* Formulario */}
             <View style={styles.form}>
 
+              {/* First Name */}
+              <Text style={styles.label}>Nombres</Text>
+              <TextInput
+                placeholder="Ej. Juan Carlos"
+                autoCapitalize="none"
+                value={first_name}
+                onChangeText={setFirstName}
+                style={styles.input}
+              />
+
+              {/* Second Name */}
+              <Text style={styles.label}>Apellidos</Text>
+              <TextInput
+                placeholder="Ej. Pérez García"
+                autoCapitalize="none"
+                value={last_name}
+                onChangeText={setLastName}
+                style={styles.input}
+              />
+
               {/* Email */}
               <Text style={styles.label}>Correo</Text>
               <TextInput
@@ -106,25 +139,20 @@ export default function RegisterScreen() {
                 style={styles.input}
               />
 
-              {/* Contraseña */}
-              <Text style={styles.label}>Contraseña</Text>
-              <TextInput
-                placeholder="********"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                style={styles.input}
-              />
-
-              {/* Confirmar contraseña */}
-              <Text style={styles.label}>Confirmar contraseña</Text>
-              <TextInput
-                placeholder="********"
-                secureTextEntry
-                value={confirmPass}
-                onChangeText={setConfirmPass}
-                style={styles.input}
-              />
+              {/* Género */}
+              <Text style={styles.label}>Género</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={gender}
+                  onValueChange={(value) => setGender(value)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Selecciona una opción" value={null} />
+                  <Picker.Item label="Masculino" value={0} />
+                  <Picker.Item label="Femenino" value={1} />
+                  <Picker.Item label="Prefiero no decirlo" value={2} />
+                </Picker>
+              </View>
 
               {/* Error */}
               {errorMsg !== '' && <Text style={styles.error}>{errorMsg}</Text>}
@@ -164,6 +192,19 @@ const styles = StyleSheet.create({
 
   label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 },
   input: { backgroundColor: '#f9fafb', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, borderWidth: 1, borderColor: '#e5e7eb', marginBottom: 16 },
+
+  pickerContainer: {
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    marginBottom: 16,
+  },
+
+  picker: {
+    height: 50,
+    paddingHorizontal: 16,
+  },
 
   error: { color: '#ef4444', textAlign: 'center', marginBottom: 12 },
 
