@@ -31,6 +31,7 @@ const IconSymbol: React.FC<IconSymbolProps> = ({ name, size = 24, color = Colors
     'zoom-in': '🔍',
     'zoom-out': '🔎',
     'navigate': '🧭',
+    'time': '⏰',
   };
   
   return (
@@ -52,6 +53,68 @@ interface LocationStepProps {
   instruction: string;
   icon: string;
 }
+
+// Componente de mapa integrado
+const IntegratedMap: React.FC = () => {
+  const { width } = Dimensions.get('window');
+  const mapSize = width - 40;
+
+  return (
+    <View style={styles.mapContainer}>
+      <View style={styles.mapHeader}>
+        <IconSymbol name="map" size={20} color={Colors.primary} />
+        <ThemedText style={styles.mapTitle}>Ubicación en Google Maps</ThemedText>
+      </View>
+      
+      <View style={[styles.mapPreview, { width: mapSize, height: mapSize * 0.6 }]}>
+        {/* Simulación de mapa estático */}
+        <View style={styles.mapImage}>
+          <Text style={styles.mapPlaceholder}>🗺️</Text>
+          <ThemedText style={styles.mapText}>Vista previa del mapa</ThemedText>
+        </View>
+        
+        {/* Puntos de interés en el mapa */}
+        <View style={[styles.mapPin, { top: '40%', left: '50%' }]}>
+          <IconSymbol name="location" size={24} color={Colors.primary} />
+          <View style={styles.pinLabel}>
+            <ThemedText style={styles.pinLabelText}>Tu ubicación</ThemedText>
+          </View>
+        </View>
+        
+        <View style={[styles.mapPin, { top: '30%', left: '30%' }]}>
+          <IconSymbol name="building" size={20} color={Colors.secondary} />
+          <View style={styles.pinLabel}>
+            <ThemedText style={styles.pinLabelText}>Colegio Electoral</ThemedText>
+          </View>
+        </View>
+      </View>
+      
+      <TouchableOpacity 
+        style={styles.mapButton}
+        onPress={() => Alert.alert(
+          'Abrir Mapa',
+          'Se abrirá Google Maps con la ubicación del centro electoral',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            { text: 'Abrir Mapa', onPress: () => console.log('Abrir Google Maps') }
+          ]
+        )}
+      >
+        <IconSymbol name="navigate" size={20} color={Colors.pearl} />
+        <ThemedText style={styles.mapButtonText}>Abrir en Google Maps</ThemedText>
+      </TouchableOpacity>
+      
+      <View style={styles.mapInfo}>
+        <ThemedText style={styles.mapInfoText}>
+          Av. República de Panamá 3555, San Luis 15021
+        </ThemedText>
+        <ThemedText style={styles.mapInfoSubtext}>
+          Distancia aproximada: 1.2 km • 5 min en auto
+        </ThemedText>
+      </View>
+    </View>
+  );
+};
 
 // Componente de plano del local de votación
 const FloorPlan: React.FC<FloorPlanProps> = ({ floor, userMesa, onLocationSelect }) => {
@@ -276,6 +339,15 @@ export default function IntegratedLocationScreen() {
           </View>
         </View>
 
+        {/* Mapa Integrado - NUEVA SECCIÓN */}
+        <View style={styles.mapSection}>
+          <View style={styles.sectionHeader}>
+            <IconSymbol name="location" size={20} color={Colors.primary} />
+            <ThemedText style={styles.sectionTitle}>Ubicación en el Mapa</ThemedText>
+          </View>
+          <IntegratedMap />
+        </View>
+
         {/* Información del centro */}
         <View style={styles.centerInfoCard}>
           <View style={styles.centerHeader}>
@@ -412,12 +484,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 10, // Reducido el padding superior
+    paddingTop: 10,
     paddingBottom: 20,
   },
-  // NUEVO ESTILO PARA ESPACIO SUPERIOR
   topSpacing: {
-    height: 50, // Ajusta este valor para subir/bajar el contenido
+    height: 50,
   },
   header: {
     marginBottom: 24,
@@ -456,6 +527,115 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginLeft: 62,
   },
+  // NUEVOS ESTILOS PARA EL MAPA
+  mapSection: {
+    marginBottom: 20,
+  },
+  mapContainer: {
+    backgroundColor: Colors.pearl,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  mapHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  mapTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.night,
+    marginLeft: 8,
+  },
+  mapPreview: {
+    backgroundColor: '#e8f4f8',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.lightGray,
+    marginBottom: 12,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  mapImage: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f8ff',
+  },
+  mapPlaceholder: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  mapText: {
+    fontSize: 14,
+    color: Colors.gray,
+    textAlign: 'center',
+  },
+  mapPin: {
+    position: 'absolute',
+    alignItems: 'center',
+  },
+  pinLabel: {
+    backgroundColor: Colors.pearl,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginTop: 4,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  pinLabelText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: Colors.night,
+  },
+  mapButton: {
+    flexDirection: 'row',
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  mapButtonText: {
+    color: Colors.pearl,
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  mapInfo: {
+    alignItems: 'center',
+  },
+  mapInfoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.night,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  mapInfoSubtext: {
+    fontSize: 12,
+    color: Colors.gray,
+    textAlign: 'center',
+  },
+  // ESTILOS EXISTENTES (se mantienen igual)
   centerInfoCard: {
     backgroundColor: Colors.pearl,
     borderRadius: 16,
