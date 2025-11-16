@@ -136,14 +136,14 @@ export default function LoginScreen() {
 
       switch (memberRole) {
           case 'citizen':
-              router.replace('/(member)/citizen'); 
+              router.replace('/(citizen)'); 
               break;
           case 'mesa_member':
-              router.replace('/(member)/mesa-member');
+              router.replace('/(mesa-member)');
               break;
           default:
               // Fallback si el rol no se reconoce
-              router.replace('/(tabs)');
+              router.replace('/auth/login');
               break;
       }
       // ----------------------------------------------------------------------

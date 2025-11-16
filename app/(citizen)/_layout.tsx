@@ -1,7 +1,7 @@
 // app/(citizen)/_layout.tsx
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Platform } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -124,29 +124,28 @@ export default function CitizenTabLayout() {
 const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    height: 70,
-    borderRadius: 20,
-    backgroundColor: Colors.pearl,
+    bottom: 0, // Pegado al fondo
+    left: 0, // Sin márgenes laterales
+    right: 0,
+    height: Platform.OS === 'ios' ? 85 : 70, // Altura ajustada para iOS/Android
     borderTopWidth: 0,
     elevation: 8,
     shadowColor: Colors.night,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: -4, // Sombra hacia arriba
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     borderWidth: 1,
     borderColor: Colors.lightGray,
+    borderBottomWidth: 0, // Sin borde inferior
+    backgroundColor: Colors.pearl,
     paddingHorizontal: 8,
-    paddingBottom: 0,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 8, // Safe area para iOS
   },
   tabBarBackground: {
     flex: 1,
-    borderRadius: 20,
     overflow: 'hidden',
   },
   tabBarBlur: {
@@ -154,20 +153,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.pearl,
   },
   tabBarItem: {
-    height: 70,
+    height: Platform.OS === 'ios' ? 70 : 60,
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 12,
   },
   tabBarLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     marginTop: 4,
-    marginBottom: 8,
+    marginBottom: Platform.OS === 'ios' ? 0 : 4,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
@@ -177,10 +176,10 @@ const styles = StyleSheet.create({
     shadowColor: Colors.primary,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });

@@ -13,46 +13,72 @@ interface NewsItem {
   image: string;
   isOfficial: boolean;
   category?: string;
+  partyId?: string;
+  partyName?: string;
 }
 
 interface NewsCardProps {
   news: NewsItem;
 }
 
-// Componente del Contador
+// Paleta de colores especificada
+const APP_COLORS = {
+  primary: '#D70026', // Phone Booth Red
+  secondary: '#EDB83D', // Flash
+  night: '#000B29', // Night
+  pearl: '#F8F5F2', // Pearl
+  gray: '#6b7280', // Gris para textos secundarios
+  lightGray: '#e5e7eb', // Gris claro para bordes
+  white: '#ffffff',
+  black: '#000000',
+};
+
+// Simulación de datos del usuario
+const USER_DATA = {
+  followedParties: ['party1', 'party3'],
+  userParty: 'party2'
+};
+
+// Componente del Contador para 12 de abril de 2026
 const CountdownTimer = () => {
   const [timeLeft, setTimeLeft] = useState({
-    months: 0,
     days: 0,
     hours: 0,
-    minutes: 0
+    minutes: 0,
+    seconds: 0
   });
 
   useEffect(() => {
-    // Fecha objetivo - puedes ajustarla según necesites
-    const targetDate = new Date('2025-04-30T00:00:00').getTime();
+    const targetDate = new Date('2026-04-12T00:00:00').getTime();
 
     const calculateTimeLeft = () => {
       const now = new Date().getTime();
       const difference = targetDate - now;
 
       if (difference > 0) {
-        const months = Math.floor(difference / (1000 * 60 * 60 * 24 * 30));
-        const days = Math.floor((difference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
         setTimeLeft({
-          months,
           days,
           hours,
-          minutes
+          minutes,
+          seconds
+        });
+      } else {
+        setTimeLeft({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0
         });
       }
     };
 
     calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 60000); // Actualizar cada minuto
+    const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
   }, []);
@@ -66,12 +92,18 @@ const CountdownTimer = () => {
 
   return (
     <View style={styles.countdownContainer}>
+      <ThemedText style={styles.countdownTitle}>
+        Elecciones 2026
+      </ThemedText>
       <View style={styles.countdownRow}>
-        <TimeUnit value={timeLeft.months} label="Meses" />
         <TimeUnit value={timeLeft.days} label="Días" />
         <TimeUnit value={timeLeft.hours} label="Horas" />
         <TimeUnit value={timeLeft.minutes} label="Minutos" />
+        <TimeUnit value={timeLeft.seconds} label="Segundos" />
       </View>
+      <ThemedText style={styles.countdownSubtitle}>
+        Domingo, 12 de abril de 2026
+      </ThemedText>
     </View>
   );
 };
@@ -83,18 +115,20 @@ const MOCK_NEWS: NewsItem[] = [
     title: 'Corte Electoral ratifica el calendario de elecciones para el próximo mes', 
     source: 'Organismo Electoral Oficial', 
     date: 'Hace 5 min', 
-    image: 'https://placehold.co/600x400/000B29/F8F5F2?text=Oficial',
+    image: 'https://placehold.co/600x400/D70026/F8F5F2?text=Oficial',
     isOfficial: true,
-    category: 'OFICIAL'
+    category: 'OFICIAL',
+    partyId: 'official'
   },
   { 
     id: 2, 
     title: 'Análisis: El impacto de las propuestas económicas en el mercado local', 
     source: 'El Diario El Comercio', 
     date: 'Hace 2 horas', 
-    image: 'https://placehold.co/600x400/D70026/F8F5F2?text=Comercio',
+    image: 'https://placehold.co/600x400/000B29/F8F5F2?text=Análisis',
     isOfficial: false,
-    category: 'ANÁLISIS'
+    category: 'ANÁLISIS',
+    partyId: 'party1'
   },
   { 
     id: 3, 
@@ -103,39 +137,69 @@ const MOCK_NEWS: NewsItem[] = [
     date: 'Hace 1 día', 
     image: 'https://placehold.co/600x400/EDB83D/000B29?text=Tutorial',
     isOfficial: true,
-    category: 'GUÍA'
+    category: 'GUÍA',
+    partyId: 'official'
   },
   { 
     id: 4, 
     title: 'Resultados preliminares muestran tendencia en encuestas nacionales', 
     source: 'Centro de Estudios Electorales', 
     date: 'Hace 3 horas', 
-    image: 'https://placehold.co/600x400/6b7280/FFFFFF?text=Encuestas',
+    image: 'https://placehold.co/600x400/6b7280/F8F5F2?text=Encuestas',
     isOfficial: false,
-    category: 'ENCUESTAS'
+    category: 'ENCUESTAS',
+    partyId: 'party3'
+  },
+  { 
+    id: 5, 
+    title: 'Partido Progresista anuncia nuevo plan de gobierno', 
+    source: 'Partido Progresista', 
+    date: 'Hace 4 horas', 
+    image: 'https://placehold.co/600x400/D70026/F8F5F2?text=Progresista',
+    isOfficial: false,
+    category: 'PARTIDO',
+    partyId: 'party2',
+    partyName: 'Partido Progresista'
+  },
+  { 
+    id: 6, 
+    title: 'Alianza Democrática presenta candidatos para elecciones', 
+    source: 'Alianza Democrática', 
+    date: 'Hace 6 horas', 
+    image: 'https://placehold.co/600x400/EDB83D/000B29?text=Alianza',
+    isOfficial: false,
+    category: 'PARTIDO',
+    partyId: 'party1',
+    partyName: 'Alianza Democrática'
   },
 ];
 
-// Componente Card de Noticia mejorado (sin cambios)
+// Componente Card de Noticia mejorado
 const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
   const getCategoryColor = () => {
     switch (news.category) {
       case 'OFICIAL':
-        return Colors.primary;
+        return APP_COLORS.primary;
       case 'ANÁLISIS':
-        return Colors.secondary;
+        return APP_COLORS.night;
       case 'GUÍA':
-        return Colors.night;
+        return APP_COLORS.secondary;
       case 'ENCUESTAS':
-        return Colors.gray;
+        return APP_COLORS.gray;
+      case 'PARTIDO':
+        return APP_COLORS.primary;
       default:
-        return Colors.primary;
+        return APP_COLORS.primary;
     }
   };
 
   const getCategoryTextColor = () => {
-    return news.category === 'ANÁLISIS' ? Colors.night : Colors.pearl;
+    // Para categorías con fondo oscuro, usar texto claro
+    return news.category === 'ANÁLISIS' ? APP_COLORS.pearl : APP_COLORS.pearl;
   };
+
+  const isUserPartyNews = news.partyId === USER_DATA.userParty;
+  const isFollowedPartyNews = USER_DATA.followedParties.includes(news.partyId || '');
 
   return (
     <TouchableOpacity 
@@ -143,21 +207,30 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
       activeOpacity={0.9}
       onPress={() => console.log('Abrir noticia:', news.title)}
     >
-      {/* Imagen con overlay */}
       <View style={styles.imageContainer}>
         <Image source={{ uri: news.image }} style={styles.cardImage} />
         <View style={styles.imageOverlay} />
         
-        {/* Badge superpuesto en la imagen */}
         <View style={[styles.floatingBadge, { backgroundColor: getCategoryColor() }]}>
           <ThemedText style={[styles.floatingBadgeText, { color: getCategoryTextColor() }]}>
             {news.category}
           </ThemedText>
         </View>
+
+        {isUserPartyNews && (
+          <View style={[styles.partyBadge, styles.userPartyBadge]}>
+            <ThemedText style={styles.partyBadgeText}>Tu Partido</ThemedText>
+          </View>
+        )}
+
+        {isFollowedPartyNews && !isUserPartyNews && (
+          <View style={[styles.partyBadge, styles.followedPartyBadge]}>
+            <ThemedText style={styles.partyBadgeText}>Siguiendo</ThemedText>
+          </View>
+        )}
       </View>
 
       <View style={styles.cardContent}>
-        {/* Header con fuente y fecha */}
         <View style={styles.headerRow}>
           <View style={styles.sourceContainer}>
             <ThemedText style={styles.sourceText}>{news.source}</ThemedText>
@@ -168,12 +241,16 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
           <ThemedText style={styles.dateText}>{news.date}</ThemedText>
         </View>
         
-        {/* Título */}
         <ThemedText type="subtitle" style={styles.cardTitle} numberOfLines={3}>
           {news.title}
         </ThemedText>
 
-        {/* Footer con indicador de lectura - CORREGIDO */}
+        {news.partyName && (
+          <View style={styles.partyInfo}>
+            <ThemedText style={styles.partyName}>{news.partyName}</ThemedText>
+          </View>
+        )}
+
         <View style={styles.cardFooter}>
           <View style={styles.readIndicator}>
             <ThemedText style={styles.readText}>Leer más</ThemedText>
@@ -182,14 +259,80 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
         </View>
       </View>
 
-      {/* Borde inferior de acento */}
       <View style={[styles.cardBorder, { backgroundColor: getCategoryColor() }]} />
     </TouchableOpacity>
   );
 };
 
+// Componente de Filtros
+const NewsFilters = ({ activeFilter, onFilterChange }: { 
+  activeFilter: string; 
+  onFilterChange: (filter: string) => void;
+}) => {
+  const filters = [
+    { id: 'all', label: 'Todas' },
+    { id: 'official', label: 'Oficiales' },
+    { id: 'myParty', label: 'Mi Partido' },
+    { id: 'followed', label: 'Siguiendo' }
+  ];
+
+  return (
+    <View style={styles.filtersContainer}>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filtersScrollContent}
+      >
+        {filters.map((filter) => (
+          <TouchableOpacity
+            key={filter.id}
+            style={[
+              styles.filterButton,
+              activeFilter === filter.id && styles.filterButtonActive
+            ]}
+            onPress={() => onFilterChange(filter.id)}
+          >
+            <ThemedText style={[
+              styles.filterButtonText,
+              activeFilter === filter.id && styles.filterButtonTextActive
+            ]}>
+              {filter.label}
+            </ThemedText>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
 export default function NewsScreen() {
   const [refreshing, setRefreshing] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [filteredNews, setFilteredNews] = useState<NewsItem[]>(MOCK_NEWS);
+
+  useEffect(() => {
+    let filtered = MOCK_NEWS;
+
+    switch (activeFilter) {
+      case 'official':
+        filtered = MOCK_NEWS.filter(news => news.isOfficial);
+        break;
+      case 'myParty':
+        filtered = MOCK_NEWS.filter(news => news.partyId === USER_DATA.userParty);
+        break;
+      case 'followed':
+        filtered = MOCK_NEWS.filter(news => 
+          USER_DATA.followedParties.includes(news.partyId || '')
+        );
+        break;
+      case 'all':
+      default:
+        filtered = MOCK_NEWS;
+        break;
+    }
+
+    setFilteredNews(filtered);
+  }, [activeFilter]);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -206,13 +349,12 @@ export default function NewsScreen() {
           <RefreshControl 
             refreshing={refreshing} 
             onRefresh={onRefresh} 
-            tintColor={Colors.primary}
-            colors={[Colors.primary]}
+            tintColor={APP_COLORS.primary}
+            colors={[APP_COLORS.primary]}
           />
         }
         showsVerticalScrollIndicator={false}
       >
-        {/* Header completamente rediseñado */}
         <View style={styles.header}>
           <View style={styles.headerBackground} />
           <View style={styles.headerContent}>
@@ -232,24 +374,35 @@ export default function NewsScreen() {
             
             <View style={styles.statsContainer}>
               <View style={styles.newsCounter}>
-                <ThemedText style={styles.newsCounterNumber}>{MOCK_NEWS.length}</ThemedText>
+                <ThemedText style={styles.newsCounterNumber}>{filteredNews.length}</ThemedText>
                 <ThemedText style={styles.newsCounterLabel}>noticias</ThemedText>
               </View>
               
-              {/* Reemplazamos el liveIndicator por el CountdownTimer */}
               <CountdownTimer />
             </View>
           </View>
         </View>
 
-        {/* Lista de noticias */}
+        <NewsFilters 
+          activeFilter={activeFilter} 
+          onFilterChange={setActiveFilter} 
+        />
+
         <View style={styles.newsList}>
-          {MOCK_NEWS.map((news) => (
-            <NewsCard key={news.id} news={news} />
-          ))}
+          {filteredNews.length > 0 ? (
+            filteredNews.map((news) => (
+              <NewsCard key={news.id} news={news} />
+            ))
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyIcon}>📭</Text>
+              <ThemedText style={styles.emptyText}>
+                No hay noticias para este filtro
+              </ThemedText>
+            </View>
+          )}
         </View>
 
-        {/* Footer mejorado */}
         <View style={styles.footer}>
           <View style={styles.footerContent}>
             <ThemedText style={styles.footerText}>
@@ -270,17 +423,16 @@ export default function NewsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.pearl,
+    backgroundColor: APP_COLORS.pearl,
   },
   scrollContent: {
     paddingBottom: 20,
   },
-  // Header completamente rediseñado
   header: {
     position: 'relative',
     paddingTop: 60,
     paddingBottom: 24,
-    backgroundColor: Colors.night,
+    backgroundColor: APP_COLORS.night,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     marginBottom: 8,
@@ -288,7 +440,7 @@ const styles = StyleSheet.create({
   },
   headerBackground: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.secondary,
+    backgroundColor: APP_COLORS.primary,
   },
   headerContent: {
     paddingHorizontal: 24,
@@ -302,19 +454,19 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: Colors.primary,
+    backgroundColor: APP_COLORS.secondary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
     elevation: 8,
-    shadowColor: Colors.night,
+    shadowColor: APP_COLORS.night,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   icon: {
     fontSize: 24,
-    color: Colors.pearl,
+    color: APP_COLORS.night,
   },
   titleContainer: {
     flex: 1,
@@ -322,12 +474,12 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: Colors.pearl,
+    color: APP_COLORS.pearl,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.pearl + 'CC',
+    color: APP_COLORS.pearl + 'CC',
     fontWeight: '500',
   },
   statsContainer: {
@@ -341,36 +493,80 @@ const styles = StyleSheet.create({
   newsCounterNumber: {
     fontSize: 32,
     fontWeight: '800',
-    color: Colors.primary,
+    color: APP_COLORS.secondary,
     marginBottom: 2,
   },
   newsCounterLabel: {
     fontSize: 14,
-    color: Colors.pearl + 'CC',
+    color: APP_COLORS.pearl + 'CC',
     fontWeight: '600',
   },
-  // Estilos para el contador
   countdownContainer: {
     alignItems: 'center',
+    backgroundColor: 'rgba(248, 245, 242, 0.15)',
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(248, 245, 242, 0.3)',
+  },
+  countdownTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: APP_COLORS.secondary,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   countdownRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
+    marginBottom: 6,
   },
   timeUnit: {
     alignItems: 'center',
-    minWidth: 50,
+    minWidth: 45,
   },
   timeValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
-    color: Colors.primary,
+    color: APP_COLORS.pearl,
     marginBottom: 2,
   },
   timeLabel: {
-    fontSize: 12,
-    color: Colors.pearl + 'CC',
+    fontSize: 10,
+    color: APP_COLORS.pearl + 'CC',
     fontWeight: '600',
+  },
+  countdownSubtitle: {
+    fontSize: 10,
+    color: APP_COLORS.pearl + 'AA',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  filtersContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: APP_COLORS.pearl,
+  },
+  filtersScrollContent: {
+    gap: 8,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: APP_COLORS.lightGray,
+    marginRight: 8,
+  },
+  filterButtonActive: {
+    backgroundColor: APP_COLORS.primary,
+  },
+  filterButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: APP_COLORS.night,
+  },
+  filterButtonTextActive: {
+    color: APP_COLORS.pearl,
   },
   newsList: {
     paddingHorizontal: 20,
@@ -378,16 +574,16 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   card: {
-    backgroundColor: Colors.pearl,
+    backgroundColor: APP_COLORS.white,
     borderRadius: 20,
     overflow: 'hidden',
     elevation: 6,
-    shadowColor: Colors.night,
+    shadowColor: APP_COLORS.night,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
     borderWidth: 1,
-    borderColor: Colors.lightGray,
+    borderColor: APP_COLORS.lightGray,
   },
   imageContainer: {
     position: 'relative',
@@ -408,7 +604,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
     elevation: 2,
-    shadowColor: Colors.night,
+    shadowColor: APP_COLORS.night,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -416,6 +612,26 @@ const styles = StyleSheet.create({
   floatingBadgeText: {
     fontSize: 12,
     fontWeight: '700',
+  },
+  partyBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    elevation: 2,
+  },
+  userPartyBadge: {
+    backgroundColor: APP_COLORS.primary,
+  },
+  followedPartyBadge: {
+    backgroundColor: APP_COLORS.secondary,
+  },
+  partyBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: APP_COLORS.night,
   },
   cardContent: {
     padding: 20,
@@ -433,26 +649,36 @@ const styles = StyleSheet.create({
   },
   sourceText: {
     fontSize: 14,
-    color: Colors.primary,
+    color: APP_COLORS.primary,
     fontWeight: '600',
   },
   verifiedDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: Colors.primary,
+    backgroundColor: APP_COLORS.primary,
     marginLeft: 6,
   },
   dateText: {
     fontSize: 13,
-    color: Colors.gray,
+    color: APP_COLORS.gray,
     fontWeight: '500',
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.night,
+    color: APP_COLORS.night,
     lineHeight: 24,
+  },
+  partyInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  partyName: {
+    fontSize: 12,
+    color: APP_COLORS.gray,
+    fontStyle: 'italic',
   },
   cardFooter: {
     flexDirection: 'row',
@@ -466,28 +692,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
-    backgroundColor: Colors.night + '08',
+    backgroundColor: APP_COLORS.lightGray,
   },
   readText: {
     fontSize: 13,
-    color: Colors.night,
+    color: APP_COLORS.night,
     fontWeight: '600',
     marginRight: 4,
   },
   arrow: {
     fontSize: 14,
-    color: Colors.night,
+    color: APP_COLORS.night,
     fontWeight: '600',
   },
   cardBorder: {
     height: 3,
+  },
+  emptyState: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+    color: APP_COLORS.gray,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: APP_COLORS.gray,
+    textAlign: 'center',
   },
   footer: {
     paddingHorizontal: 24,
     paddingTop: 32,
     paddingBottom: 20,
     borderTopWidth: 1,
-    borderTopColor: Colors.lightGray,
+    borderTopColor: APP_COLORS.lightGray,
     marginTop: 20,
   },
   footerContent: {
@@ -495,7 +735,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: Colors.gray,
+    color: APP_COLORS.gray,
     fontWeight: '500',
     marginBottom: 8,
   },
@@ -504,7 +744,7 @@ const styles = StyleSheet.create({
   },
   footerSourceText: {
     fontSize: 12,
-    color: Colors.gray,
+    color: APP_COLORS.gray,
     textAlign: 'center',
     lineHeight: 16,
   },

@@ -1,10 +1,7 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Image,
-    Platform,
+    Modal,
     ScrollView,
     StyleSheet,
     TextInput,
@@ -14,11 +11,6 @@ import {
 import { Colors } from '../../constants/colors';
 import { ThemedText } from '../themed-text';
 import { ThemedView } from '../themed-view';
-
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = width * 0.78;
-const CARD_GAP = 16;
-const SPACER = (width - CARD_WIDTH) / 2;
 
 // Interfaces TypeScript
 interface Party {
@@ -32,7 +24,7 @@ interface Party {
   department: string;
   province: string;
   district: string;
-  isSpacer?: boolean;
+  proposals?: string[];
 }
 
 interface LocationFilter {
@@ -53,7 +45,12 @@ const MOCK_PARTIES: Party[] = [
     color: Colors.primary,
     department: 'Lima',
     province: 'Lima',
-    district: 'Miraflores'
+    district: 'Miraflores',
+    proposals: [
+      'Mejora del sistema de salud pública',
+      'Inversión en educación tecnológica',
+      'Programas de vivienda social'
+    ]
   },
   {
     id: '2',
@@ -65,7 +62,12 @@ const MOCK_PARTIES: Party[] = [
     color: Colors.night,
     department: 'Lima',
     province: 'Lima',
-    district: 'San Isidro'
+    district: 'San Isidro',
+    proposals: [
+      'Creación de empleos tecnológicos',
+      'Infraestructura vial moderna',
+      'Apoyo a pequeñas empresas'
+    ]
   },
   {
     id: '3',
@@ -77,7 +79,12 @@ const MOCK_PARTIES: Party[] = [
     color: Colors.secondary,
     department: 'Arequipa',
     province: 'Arequipa',
-    district: 'Yanahuara'
+    district: 'Yanahuara',
+    proposals: [
+      'Transparencia en la gestión pública',
+      'Participación ciudadana activa',
+      'Fortalecimiento de la democracia'
+    ]
   },
   {
     id: '4',
@@ -89,31 +96,12 @@ const MOCK_PARTIES: Party[] = [
     color: Colors.gray,
     department: 'Cusco',
     province: 'Cusco',
-    district: 'Cusco'
-  },
-  {
-    id: '5',
-    name: 'Partido Verde',
-    candidate: 'Sra. Ana López',
-    slogan: 'Sostenibilidad y progreso.',
-    logo: 'https://placehold.co/120x120/00A859/FFFFFF?text=PV',
-    backgroundImage: 'https://placehold.co/400x300/00A859/FFFFFF?text=Ana',
-    color: '#00A859',
-    department: 'Lima',
-    province: 'Lima',
-    district: 'Barranco'
-  },
-  {
-    id: '6',
-    name: 'Unión Nacional',
-    candidate: 'Dr. Roberto Silva',
-    slogan: 'Unidos por el cambio.',
-    logo: 'https://placehold.co/120x120/8B4513/FFFFFF?text=UN',
-    backgroundImage: 'https://placehold.co/400x300/8B4513/FFFFFF?text=Roberto',
-    color: '#8B4513',
-    department: 'La Libertad',
-    province: 'Trujillo',
-    district: 'Trujillo'
+    district: 'Cusco',
+    proposals: [
+      'Emprendimiento juvenil',
+      'Educación digital gratuita',
+      'Deporte y cultura comunitaria'
+    ]
   },
 ];
 
@@ -136,96 +124,6 @@ const LOCATION_DATA = {
     'Piura': ['Piura', 'Castilla', 'Catacaos'],
     'Chiclayo': ['Chiclayo', 'José Leonardo Ortiz', 'La Victoria']
   }
-};
-
-// Agregar elementos espaciadores al inicio y final para centrado
-const createDataWithSpacers = (data: Party[]) => [
-  { id: 'left-spacer', isSpacer: true } as Party,
-  ...data,
-  { id: 'right-spacer', isSpacer: true } as Party
-];
-
-// Componente para cada tarjeta de candidato/partido
-const CandidateCard: React.FC<{ party: Party; scrollX?: Animated.Value; index?: number }> = ({ 
-  party, 
-  scrollX, 
-  index 
-}) => {
-  if (party.isSpacer) {
-    return <View style={{ width: SPACER - CARD_GAP }} />;
-  }
-
-  const inputRange = [
-    ((index || 0) - 2) * (CARD_WIDTH + CARD_GAP),
-    ((index || 0) - 1) * (CARD_WIDTH + CARD_GAP),
-    (index || 0) * (CARD_WIDTH + CARD_GAP),
-  ];
-
-  const scale = scrollX?.interpolate({
-    inputRange,
-    outputRange: [0.92, 1, 0.92],
-    extrapolate: 'clamp',
-  });
-
-  const opacity = scrollX?.interpolate({
-    inputRange,
-    outputRange: [0.7, 1, 0.7],
-    extrapolate: 'clamp',
-  });
-
-  return (
-    <Animated.View style={{ 
-      transform: [{ scale: scale || 1 }],
-      opacity: opacity || 1,
-    }}>
-      <TouchableOpacity 
-        style={styles.card}
-        onPress={() => console.log(`Ver detalles de ${party.candidate} (${party.name})`)}
-        activeOpacity={0.9}
-      >
-        <Image 
-          source={{ uri: party.backgroundImage }} 
-          style={styles.cardBackgroundImage} 
-        />
-        
-        <View style={[styles.cardOverlay, { 
-          backgroundColor: party.color,
-        }]} />
-        
-        <View style={styles.cardShine} />
-        
-        <View style={styles.cardContent}>
-          <View style={styles.logoContainer}>
-            <View style={[styles.logoBackground, { backgroundColor: party.color }]} />
-            <Image source={{ uri: party.logo }} style={styles.partyLogo} />
-          </View>
-          
-          <View style={styles.partyInfo}>
-            <ThemedText style={styles.partyName}>{party.name}</ThemedText>
-            <ThemedText style={styles.candidateName}>{party.candidate}</ThemedText>
-            
-            {/* Información de ubicación */}
-            <View style={styles.locationContainer}>
-              <IconSymbol name="map.fill" size={14} color={Colors.pearl} />
-              <ThemedText style={styles.locationText}>
-                {party.district}, {party.province}
-              </ThemedText>
-            </View>
-            
-            <View style={[styles.divider, { backgroundColor: Colors.pearl }]} />
-            
-            <ThemedText style={styles.slogan}>"{party.slogan}"</ThemedText>
-          </View>
-
-          <View style={[styles.actionButton, { backgroundColor: party.color }]}>
-            <ThemedText style={styles.actionText}>Ver Propuestas</ThemedText>
-          </View>
-        </View>
-        
-        <View style={[styles.cardBorder, { backgroundColor: party.color }]} />
-      </TouchableOpacity>
-    </Animated.View>
-  );
 };
 
 // Componente de filtro de ubicación
@@ -374,15 +272,130 @@ const LocationFilter: React.FC<{
   );
 };
 
+// Componente de modal para detalles del candidato
+const CandidateModal: React.FC<{
+  visible: boolean;
+  candidate: Party | null;
+  onClose: () => void;
+}> = ({ visible, candidate, onClose }) => {
+  if (!candidate) return null;
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          {/* Header del modal */}
+          <View style={[styles.modalHeader, { backgroundColor: candidate.color }]}>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <IconSymbol name="xmark" size={20} color={Colors.pearl} />
+            </TouchableOpacity>
+            <ThemedText style={styles.modalTitle}>Propuestas</ThemedText>
+          </View>
+
+          {/* Contenido del modal */}
+          <ScrollView style={styles.modalBody}>
+            {/* Información del candidato */}
+            <View style={styles.candidateInfo}>
+              <View style={styles.candidateHeader}>
+                <View style={[styles.logoContainer, { backgroundColor: candidate.color + '20' }]}>
+                  <IconSymbol name="person.fill" size={24} color={candidate.color} />
+                </View>
+                <View style={styles.candidateDetails}>
+                  <ThemedText style={styles.modalCandidateName}>{candidate.candidate}</ThemedText>
+                  <ThemedText style={styles.modalPartyName}>{candidate.name}</ThemedText>
+                  <View style={styles.locationRow}>
+                    <IconSymbol name="map.fill" size={14} color={Colors.gray} />
+                    <ThemedText style={styles.modalLocation}>
+                      {candidate.district}, {candidate.province}, {candidate.department}
+                    </ThemedText>
+                  </View>
+                </View>
+              </View>
+              
+              <View style={styles.sloganContainer}>
+                <ThemedText style={styles.modalSlogan}>"{candidate.slogan}"</ThemedText>
+              </View>
+            </View>
+
+            {/* Lista de propuestas */}
+            <View style={styles.proposalsSection}>
+              <ThemedText style={styles.proposalsTitle}>Principales Propuestas</ThemedText>
+              {candidate.proposals?.map((proposal, index) => (
+                <View key={index} style={styles.proposalItem}>
+                  <View style={[styles.proposalNumber, { backgroundColor: candidate.color }]}>
+                    <ThemedText style={styles.proposalNumberText}>{index + 1}</ThemedText>
+                  </View>
+                  <ThemedText style={styles.proposalText}>{proposal}</ThemedText>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+
+          {/* Footer del modal */}
+          <View style={styles.modalFooter}>
+            <TouchableOpacity 
+              style={[styles.actionButton, { backgroundColor: candidate.color }]}
+              onPress={onClose}
+            >
+              <ThemedText style={styles.actionButtonText}>Cerrar</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+// Componente de item de lista
+const CandidateListItem: React.FC<{
+  candidate: Party;
+  onViewProposals: (candidate: Party) => void;
+}> = ({ candidate, onViewProposals }) => {
+  return (
+    <View style={styles.listItem}>
+      <View style={styles.listItemContent}>
+        <View style={[styles.listItemIcon, { backgroundColor: candidate.color + '20' }]}>
+          <IconSymbol name="person.fill" size={20} color={candidate.color} />
+        </View>
+        
+        <View style={styles.listItemInfo}>
+          <ThemedText style={styles.listCandidateName}>{candidate.candidate}</ThemedText>
+          <ThemedText style={styles.listPartyName}>{candidate.name}</ThemedText>
+          <View style={styles.listLocation}>
+            <IconSymbol name="map.fill" size={12} color={Colors.gray} />
+            <ThemedText style={styles.listLocationText}>
+              {candidate.district}, {candidate.province}
+            </ThemedText>
+          </View>
+        </View>
+        
+        <TouchableOpacity 
+          style={[styles.viewButton, { backgroundColor: candidate.color }]}
+          onPress={() => onViewProposals(candidate)}
+        >
+          <ThemedText style={styles.viewButtonText}>Ver</ThemedText>
+        </TouchableOpacity>
+      </View>
+      
+      <View style={[styles.listItemDivider, { backgroundColor: candidate.color + '20' }]} />
+    </View>
+  );
+};
+
 export default function FilterCandidatesScreen() {
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [locationFilter, setLocationFilter] = useState<LocationFilter>({
     department: '',
     province: '',
     district: ''
   });
+  const [selectedCandidate, setSelectedCandidate] = useState<Party | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Filtrar candidatos
   const filteredCandidates = MOCK_PARTIES.filter(party => {
@@ -396,19 +409,15 @@ export default function FilterCandidatesScreen() {
     return matchesSearch && matchesLocation;
   });
 
-  const DATA_WITH_SPACERS = createDataWithSpacers(filteredCandidates);
+  const handleViewProposals = (candidate: Party) => {
+    setSelectedCandidate(candidate);
+    setModalVisible(true);
+  };
 
-  const onScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-    {
-      useNativeDriver: false,
-      listener: (event: any) => {
-        const offsetX = event.nativeEvent.contentOffset.x;
-        const index = Math.round(offsetX / (CARD_WIDTH + CARD_GAP));
-        setCurrentIndex(Math.max(0, index));
-      }
-    }
-  );
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedCandidate(null);
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -456,39 +465,17 @@ export default function FilterCandidatesScreen() {
         </View>
       </View>
 
-      {/* Carrusel */}
+      {/* Lista de candidatos */}
       {filteredCandidates.length > 0 ? (
-        <View style={styles.carouselWrapper}>
-          <Animated.FlatList
-            data={DATA_WITH_SPACERS}
-            renderItem={({ item, index }) => (
-              <CandidateCard 
-                party={item} 
-                scrollX={scrollX}
-                index={index}
-              />
-            )}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.carouselContainer}
-            snapToInterval={CARD_WIDTH + CARD_GAP}
-            decelerationRate="fast"
-            scrollEventThrottle={16}
-            onScroll={onScroll}
-            snapToAlignment="center"
-          />
-
-          {/* Información del candidato actual */}
-          <View style={styles.currentInfo}>
-            <ThemedText style={styles.currentInfoText}>
-              {currentIndex + 1} de {filteredCandidates.length}
-            </ThemedText>
-            <ThemedText style={styles.currentCandidateText}>
-              {filteredCandidates[currentIndex]?.candidate}
-            </ThemedText>
-          </View>
-        </View>
+        <ScrollView style={styles.listContainer}>
+          {filteredCandidates.map((candidate) => (
+            <CandidateListItem
+              key={candidate.id}
+              candidate={candidate}
+              onViewProposals={handleViewProposals}
+            />
+          ))}
+        </ScrollView>
       ) : (
         <View style={styles.emptyState}>
           <IconSymbol name="magnifyingglass" size={64} color={Colors.lightGray} />
@@ -498,6 +485,13 @@ export default function FilterCandidatesScreen() {
           </ThemedText>
         </View>
       )}
+
+      {/* Modal de propuestas */}
+      <CandidateModal
+        visible={modalVisible}
+        candidate={selectedCandidate}
+        onClose={closeModal}
+      />
     </ThemedView>
   );
 }
@@ -506,17 +500,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.pearl,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
   },
   header: {
-    paddingHorizontal: 24,
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   titleSection: {
     marginBottom: 20,
   },
   mainTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '800',
     color: Colors.night,
     marginBottom: 8,
@@ -609,8 +603,8 @@ const styles = StyleSheet.create({
   dropdown: {
     position: 'absolute',
     top: 100,
-    left: 24,
-    right: 24,
+    left: 20,
+    right: 20,
     backgroundColor: Colors.pearl,
     borderRadius: 16,
     elevation: 8,
@@ -645,165 +639,63 @@ const styles = StyleSheet.create({
     color: Colors.gray,
     fontWeight: '500',
   },
-  carouselWrapper: {
+  listContainer: {
     flex: 1,
-    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
-  carouselContainer: {
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-  card: {
-    width: CARD_WIDTH,
-    height: 440,
-    borderRadius: 24,
-    overflow: 'hidden',
-    marginHorizontal: CARD_GAP / 2,
-    backgroundColor: Colors.pearl,
-    elevation: 8,
-    shadowColor: Colors.night,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  cardBackgroundImage: {
-    ...StyleSheet.absoluteFillObject,
-    resizeMode: 'cover',
-  },
-  cardOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.85,
-  },
-  cardShine: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-  },
-  cardContent: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'space-between',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-    position: 'relative',
-  },
-  logoBackground: {
-    position: 'absolute',
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    opacity: 0.2,
-    top: -10,
-  },
-  partyLogo: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 4,
-    borderColor: Colors.pearl,
-    backgroundColor: Colors.pearl,
-  },
-  partyInfo: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  partyName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.pearl,
-    textAlign: 'center',
+  listItem: {
     marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
   },
-  candidateName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.pearl,
-    textAlign: 'center',
-    marginBottom: 12,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4,
-  },
-  locationContainer: {
+  listItemContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 4,
   },
-  locationText: {
-    fontSize: 14,
-    color: Colors.pearl,
-    marginLeft: 6,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 2,
-  },
-  divider: {
-    width: 60,
-    height: 3,
-    borderRadius: 2,
-    marginBottom: 16,
-    opacity: 0.9,
-  },
-  slogan: {
-    fontSize: 15,
-    color: Colors.pearl,
-    textAlign: 'center',
-    fontStyle: 'italic',
-    lineHeight: 20,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 2,
-  },
-  actionButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 20,
+  listItemIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
-    shadowColor: Colors.night,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    marginRight: 12,
   },
-  actionText: {
-    color: Colors.pearl,
-    fontSize: 14,
+  listItemInfo: {
+    flex: 1,
+  },
+  listCandidateName: {
+    fontSize: 16,
     fontWeight: '600',
+    color: Colors.night,
+    marginBottom: 2,
   },
-  cardBorder: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 4,
-  },
-  currentInfo: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-  },
-  currentInfoText: {
+  listPartyName: {
     fontSize: 14,
     color: Colors.gray,
-    fontWeight: '600',
     marginBottom: 4,
   },
-  currentCandidateText: {
-    fontSize: 16,
-    color: Colors.night,
-    fontWeight: '700',
+  listLocation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  listLocationText: {
+    fontSize: 12,
+    color: Colors.gray,
+    marginLeft: 4,
+  },
+  viewButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  viewButtonText: {
+    color: Colors.pearl,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  listItemDivider: {
+    height: 1,
+    marginLeft: 56,
   },
   emptyState: {
     flex: 1,
@@ -824,5 +716,153 @@ const styles = StyleSheet.create({
     color: Colors.gray,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  // Estilos del modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: Colors.pearl,
+    borderRadius: 20,
+    width: '100%',
+    maxHeight: '80%',
+    overflow: 'hidden',
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalTitle: {
+    flex: 1,
+    textAlign: 'center',
+    color: Colors.pearl,
+    fontSize: 18,
+    fontWeight: '700',
+    marginLeft: -24,
+  },
+  modalBody: {
+    flex: 1,
+    padding: 20,
+  },
+  candidateInfo: {
+    marginBottom: 24,
+  },
+  candidateHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logoContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  candidateDetails: {
+    flex: 1,
+  },
+  modalCandidateName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.night,
+    marginBottom: 4,
+  },
+  modalPartyName: {
+    fontSize: 16,
+    color: Colors.gray,
+    marginBottom: 8,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modalLocation: {
+    fontSize: 14,
+    color: Colors.gray,
+    marginLeft: 6,
+  },
+  sloganContainer: {
+    backgroundColor: Colors.lightGray + '20',
+    padding: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.primary,
+  },
+  modalSlogan: {
+    fontSize: 16,
+    color: Colors.night,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  proposalsSection: {
+    marginTop: 8,
+  },
+  proposalsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.night,
+    marginBottom: 16,
+  },
+  proposalItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: Colors.lightGray + '15',
+    borderRadius: 12,
+  },
+  proposalNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    marginTop: 2,
+  },
+  proposalNumberText: {
+    color: Colors.pearl,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  proposalText: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.night,
+    lineHeight: 20,
+  },
+  modalFooter: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+  },
+  actionButton: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    color: Colors.pearl,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

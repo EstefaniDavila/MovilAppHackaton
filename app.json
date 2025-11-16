@@ -3,7 +3,7 @@
     // ======================
     // CONFIGURACIÓN BÁSICA
     // ======================
-    "name": "",
+    "name": "Yachay Votu ",
     "slug": "yachay-votu",
     "version": "1.0.0",
     "scheme": "yachayvotu",
@@ -24,7 +24,8 @@
     // CONFIGURACIÓN POR PLATAFORMA
     // ======================
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yachayvotu.app"
     },
 
     "android": {
@@ -39,7 +40,8 @@
 
     "web": {
       "output": "static",
-      "favicon": "./assets/images/logoyachay1.png"
+      "favicon": "./assets/images/logoyachay1.png",
+      "name": "Yachay Votu - Plataforma Electoral Inteligente"
     },
 
     // ======================

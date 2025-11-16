@@ -256,6 +256,9 @@ export default function MembersScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* ESPACIO EN LA PARTE SUPERIOR - AÑADIDO */}
+        <View style={styles.topSpacing} />
+        
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.titleSection}>
@@ -444,7 +447,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingTop: 10, // Reducido el padding superior
+    paddingBottom: 20,
+  },
+  // NUEVO ESTILO PARA ESPACIO SUPERIOR
+  topSpacing: {
+    height: 50, // Ajusta este valor para subir/bajar el contenido
   },
   header: {
     marginBottom: 24,

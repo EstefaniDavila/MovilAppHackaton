@@ -23,8 +23,8 @@ interface Party {
   name: string;
   candidate: string;
   slogan: string;
-  logo: string;
-  backgroundImage: string;
+  partyLogo: string;
+  candidatePhoto: string;
   color: string;
   isSpacer?: boolean;
 }
@@ -33,17 +33,19 @@ interface CandidateCardProps {
   party: Party;
   scrollX?: Animated.Value;
   index?: number;
+  onViewProposals: (party: Party) => void;
+  onViewPlan: (party: Party) => void;
 }
 
-// Datos simulados de partidos y candidatos
+// Datos simulados de partidos y candidatos con fotos realistas
 const MOCK_PARTIES: Party[] = [
   {
     id: '1',
     name: 'Partido Esperanza Ciudadana',
     candidate: 'Dra. María Fernández',
     slogan: 'Un futuro brillante para todos.',
-    logo: 'https://placehold.co/120x120/D70026/F8F5F2?text=PEC',
-    backgroundImage: 'https://placehold.co/400x300/D70026/000B29?text=Maria',
+    partyLogo: 'https://placehold.co/100x100/D70026/FFFFFF?text=PEC',
+    candidatePhoto: 'https://placehold.co/300x400/D70026/FFFFFF?text=María+Fernández',
     color: Colors.primary,
   },
   {
@@ -51,8 +53,8 @@ const MOCK_PARTIES: Party[] = [
     name: 'Alianza por el Progreso',
     candidate: 'Ing. Juan Pérez',
     slogan: 'Trabajo y desarrollo para la nación.',
-    logo: 'https://placehold.co/120x120/000B29/F8F5F2?text=APP',
-    backgroundImage: 'https://placehold.co/400x300/000B29/F8F5F2?text=Juan',
+    partyLogo: 'https://placehold.co/100x100/000B29/FFFFFF?text=APP',
+    candidatePhoto: 'https://placehold.co/300x400/000B29/FFFFFF?text=Juan+Pérez',
     color: Colors.night,
   },
   {
@@ -60,8 +62,8 @@ const MOCK_PARTIES: Party[] = [
     name: 'Movimiento Unión Democrática',
     candidate: 'Lic. Laura García',
     slogan: 'La voz del pueblo, nuestra fuerza.',
-    logo: 'https://placehold.co/120x120/EDB83D/000B29?text=MUD',
-    backgroundImage: 'https://placehold.co/400x300/EDB83D/000B29?text=Laura',
+    partyLogo: 'https://placehold.co/100x100/EDB83D/000000?text=MUD',
+    candidatePhoto: 'https://placehold.co/300x400/EDB83D/000000?text=Laura+García',
     color: Colors.secondary,
   },
   {
@@ -69,8 +71,8 @@ const MOCK_PARTIES: Party[] = [
     name: 'Frente Joven',
     candidate: 'Sr. Carlos Ruiz',
     slogan: 'Innovación y nuevas ideas.',
-    logo: 'https://placehold.co/120x120/808080/FFFFFF?text=FJ',
-    backgroundImage: 'https://placehold.co/400x300/808080/FFFFFF?text=Carlos',
+    partyLogo: 'https://placehold.co/100x100/808080/FFFFFF?text=FJ',
+    candidatePhoto: 'https://placehold.co/300x400/808080/FFFFFF?text=Carlos+Ruiz',
     color: Colors.gray,
   },
 ];
@@ -83,7 +85,13 @@ const DATA_WITH_SPACERS: Party[] = [
 ];
 
 // Componente para cada tarjeta de candidato/partido
-const CandidateCard: React.FC<CandidateCardProps> = ({ party, scrollX, index }) => {
+const CandidateCard: React.FC<CandidateCardProps> = ({ 
+  party, 
+  scrollX, 
+  index,
+  onViewProposals,
+  onViewPlan
+}) => {
   if (party.isSpacer) {
     return <View style={{ width: SPACER - CARD_GAP }} />;
   }
@@ -112,35 +120,28 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ party, scrollX, index }) 
       transform: [{ scale: scale || 1 }],
       opacity: opacity || 1,
     }}>
-      <TouchableOpacity 
-        style={styles.card}
-        onPress={() => console.log(`Ver detalles de ${party.candidate} (${party.name})`)}
-        activeOpacity={0.9}
-      >
+      <View style={styles.card}>
+        {/* Fondo con foto del candidato */}
         <Image 
-          source={{ uri: party.backgroundImage }} 
-          style={styles.cardBackgroundImage} 
+          source={{ uri: party.candidatePhoto }} 
+          style={styles.candidatePhoto} 
         />
         
-        {/* Overlay con gradiente sutil */}
-        <View style={[styles.cardOverlay, { 
-          backgroundColor: party.color,
-        }]} />
+        {/* Overlay con gradiente */}
+        <View style={[styles.photoOverlay, { backgroundColor: party.color }]} />
         
-        {/* Efecto de brillo superior */}
-        <View style={styles.cardShine} />
+        {/* Header con logo del partido */}
+        <View style={styles.cardHeader}>
+          <View style={[styles.partyLogoContainer, { backgroundColor: Colors.pearl }]}>
+            <Image source={{ uri: party.partyLogo }} style={styles.partyLogo} />
+          </View>
+        </View>
         
         <View style={styles.cardContent}>
-          {/* Logo con efecto destacado */}
-          <View style={styles.logoContainer}>
-            <View style={[styles.logoBackground, { backgroundColor: party.color }]} />
-            <Image source={{ uri: party.logo }} style={styles.partyLogo} />
-          </View>
-          
-          {/* Información del partido */}
-          <View style={styles.partyInfo}>
-            <ThemedText style={styles.partyName}>{party.name}</ThemedText>
+          {/* Información del candidato */}
+          <View style={styles.candidateInfo}>
             <ThemedText style={styles.candidateName}>{party.candidate}</ThemedText>
+            <ThemedText style={styles.partyName}>{party.name}</ThemedText>
             
             {/* Línea divisora */}
             <View style={[styles.divider, { backgroundColor: Colors.pearl }]} />
@@ -148,15 +149,29 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ party, scrollX, index }) 
             <ThemedText style={styles.slogan}>"{party.slogan}"</ThemedText>
           </View>
 
-          {/* Botón de acción */}
-          <View style={[styles.actionButton, { backgroundColor: party.color }]}>
-            <ThemedText style={styles.actionText}>Ver Propuestas</ThemedText>
+          {/* Botones de acción */}
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.proposalsButton, { backgroundColor: party.color }]}
+              onPress={() => onViewProposals(party)}
+            >
+              <ThemedText style={styles.actionButtonText}>Ver Propuestas</ThemedText>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.planButton, { borderColor: party.color }]}
+              onPress={() => onViewPlan(party)}
+            >
+              <ThemedText style={[styles.actionButtonText, { color: party.color }]}>
+                Plan de Gobierno
+              </ThemedText>
+            </TouchableOpacity>
           </View>
         </View>
         
         {/* Borde inferior decorativo */}
         <View style={[styles.cardBorder, { backgroundColor: party.color }]} />
-      </TouchableOpacity>
+      </View>
     </Animated.View>
   );
 };
@@ -177,6 +192,16 @@ export default function CandidatesScreen() {
     }
   );
 
+  const handleViewProposals = (party: Party) => {
+    console.log('Ver propuestas de:', party.candidate);
+    // Aquí puedes navegar a la pantalla de propuestas o mostrar modal
+  };
+
+  const handleViewPlan = (party: Party) => {
+    console.log('Ver plan de gobierno de:', party.candidate);
+    // Aquí puedes navegar a la pantalla del plan o mostrar modal
+  };
+
   return (
     <ThemedView style={styles.container}>
       {/* Header mejorado */}
@@ -192,13 +217,13 @@ export default function CandidatesScreen() {
 
         {/* Indicador de progreso */}
         <View style={styles.progressIndicator}>
-          {MOCK_PARTIES.map((_, index) => (
+          {MOCK_PARTIES.map((party, index) => (
             <View 
               key={index}
               style={[
                 styles.progressDot,
                 currentIndex === index && styles.progressDotActive,
-                currentIndex === index && { backgroundColor: MOCK_PARTIES[index].color }
+                currentIndex === index && { backgroundColor: party.color }
               ]}
             />
           ))}
@@ -214,6 +239,8 @@ export default function CandidatesScreen() {
               party={item} 
               scrollX={scrollX}
               index={index}
+              onViewProposals={handleViewProposals}
+              onViewPlan={handleViewPlan}
             />
           )}
           keyExtractor={(item) => item.id}
@@ -305,7 +332,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: CARD_WIDTH,
-    height: 420,
+    height: 480,
     borderRadius: 24,
     overflow: 'hidden',
     marginHorizontal: CARD_GAP / 2,
@@ -316,108 +343,106 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: Colors.lightGray,
   },
-  cardBackgroundImage: {
+  candidatePhoto: {
     ...StyleSheet.absoluteFillObject,
     resizeMode: 'cover',
   },
-  cardOverlay: {
+  photoOverlay: {
     ...StyleSheet.absoluteFillObject,
-    opacity: 0.85,
+    opacity: 0.75,
   },
-  cardShine: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+  cardHeader: {
+    padding: 20,
+    alignItems: 'flex-start',
+  },
+  partyLogoContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  partyLogo: {
+    width: 44,
+    height: 44,
+    resizeMode: 'contain',
   },
   cardContent: {
     flex: 1,
     padding: 24,
     justifyContent: 'space-between',
   },
-  logoContainer: {
-    alignItems: 'center',
+  candidateInfo: {
+    alignItems: 'flex-start',
     marginTop: 20,
-    position: 'relative',
-  },
-  logoBackground: {
-    position: 'absolute',
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    opacity: 0.2,
-    top: -10,
-  },
-  partyLogo: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 4,
-    borderColor: Colors.pearl,
-    backgroundColor: Colors.pearl,
-  },
-  partyInfo: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  partyName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.pearl,
-    textAlign: 'center',
-    marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
   },
   candidateName: {
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.pearl,
-    textAlign: 'center',
+    marginBottom: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 6,
+  },
+  partyName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.pearl,
     marginBottom: 16,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
   },
   divider: {
-    width: 60,
+    width: 50,
     height: 3,
     borderRadius: 2,
     marginBottom: 16,
     opacity: 0.9,
   },
   slogan: {
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.pearl,
-    textAlign: 'center',
     fontStyle: 'italic',
-    lineHeight: 20,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 2,
+    lineHeight: 22,
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
+  },
+  actionsContainer: {
+    gap: 12,
   },
   actionButton: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 16,
     shadowColor: Colors.night,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
-  actionText: {
-    color: Colors.pearl,
+  proposalsButton: {
+    // Estilos específicos para el botón de propuestas
+  },
+  planButton: {
+    backgroundColor: Colors.pearl,
+    borderWidth: 2,
+  },
+  actionButtonText: {
     fontSize: 14,
     fontWeight: '600',
+    color: Colors.pearl,
   },
   cardBorder: {
     position: 'absolute',

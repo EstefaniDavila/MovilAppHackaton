@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '../../components/themed-text';
 import { ThemedView } from '../../components/themed-view';
 import { Colors } from '../../constants/colors';
@@ -19,12 +19,18 @@ const IconSymbol: React.FC<IconSymbolProps> = ({ name, size = 24, color = Colors
     'document': '📄',
     'shield': '🛡️',
     'scale': '⚖️',
-    'chevron-right': '➡️',
-    'external-link': '🔗',
-    'time': '⏰',
+    'building': '🏫',
+    'floor': '🏢',
+    'classroom': '🚪',
+    'entrance': '🚶‍♂️',
+    'stairs': '📶',
+    'elevator': '🛗',
+    'restroom': '🚻',
+    'parking': '🅿️',
     'info': 'ℹ️',
-    'warning': '⚠️',
-    'check': '✅',
+    'zoom-in': '🔍',
+    'zoom-out': '🔎',
+    'navigate': '🧭',
   };
   
   return (
@@ -35,87 +41,213 @@ const IconSymbol: React.FC<IconSymbolProps> = ({ name, size = 24, color = Colors
 };
 
 // Interfaces para los tipos
-interface InfoCardProps {
-  title: string;
-  iconName: string;
-  iconColor: string;
-  children: React.ReactNode;
-  onPress?: () => void;
+interface FloorPlanProps {
+  floor: number;
+  userMesa: string;
+  onLocationSelect: (location: string) => void;
 }
 
-interface StepItemProps {
-  number: number;
-  title: string;
-  description: string;
+interface LocationStepProps {
+  step: number;
+  instruction: string;
+  icon: string;
 }
 
-// Componente de tarjeta de información
-const InfoCard: React.FC<InfoCardProps> = ({ title, iconName, iconColor, children, onPress }) => {
-  return (
-    <TouchableOpacity 
-      style={styles.infoCard}
-      onPress={onPress}
-      activeOpacity={onPress ? 0.7 : 1}
-    >
-      <View style={styles.cardHeader}>
-        <View style={[styles.cardIconContainer, { backgroundColor: iconColor + '20' }]}>
-          <IconSymbol name={iconName} size={24} color={iconColor} />
-        </View>
-        <View style={styles.cardTitleContainer}>
-          <ThemedText style={styles.cardTitle}>{title}</ThemedText>
-        </View>
-        {onPress && (
-          <IconSymbol name="chevron-right" size={16} color={Colors.gray} />
-        )}
-      </View>
-      <View style={styles.cardContent}>
-        {children}
-      </View>
-    </TouchableOpacity>
-  );
-};
+// Componente de plano del local de votación
+const FloorPlan: React.FC<FloorPlanProps> = ({ floor, userMesa, onLocationSelect }) => {
+  const { width } = Dimensions.get('window');
+  const planSize = width - 80;
+  
+  // Datos del plano del local (simulado)
+  const floorData = {
+    1: {
+      name: 'Planta Baja',
+      classrooms: [
+        { id: 'Mesa 1-10', number: '101', x: 50, y: 150, type: 'voting' },
+        { id: 'Mesa 11-20', number: '102', x: 150, y: 150, type: 'voting' },
+        { id: 'Oficina Jurado', number: '103', x: 250, y: 50, type: 'office' },
+        { id: 'Baños', number: 'WC', x: 50, y: 250, type: 'facility' },
+        { id: 'Entrada Principal', number: 'ENT', x: 150, y: 300, type: 'entrance' },
+      ]
+    },
+    2: {
+      name: 'Primer Piso',
+      classrooms: [
+        { id: 'Mesa 21-30', number: '201', x: 50, y: 100, type: 'voting' },
+        { id: 'Mesa 31-40', number: '202', x: 150, y: 100, type: 'voting' },
+        { id: 'Mesa 41-50', number: '203', x: 250, y: 100, type: 'voting' },
+        { id: userMesa, number: '204', x: 150, y: 200, type: 'user-mesa' },
+        { id: 'Baños', number: 'WC', x: 50, y: 250, type: 'facility' },
+        { id: 'Escaleras', number: 'ESC', x: 250, y: 250, type: 'stairs' },
+      ]
+    }
+  };
 
-// Componente de paso instructivo
-const StepItem: React.FC<StepItemProps> = ({ number, title, description }) => {
+  const currentFloor = floorData[floor as keyof typeof floorData];
+
+  const getLocationColor = (type: string) => {
+    switch (type) {
+      case 'user-mesa': return Colors.primary;
+      case 'voting': return Colors.secondary;
+      case 'entrance': return Colors.night;
+      case 'office': return '#8B4513';
+      case 'facility': return Colors.gray;
+      case 'stairs': return '#FFA500';
+      default: return Colors.lightGray;
+    }
+  };
+
+  const getLocationSize = (type: string) => {
+    switch (type) {
+      case 'user-mesa': return 24;
+      case 'voting': return 20;
+      default: return 16;
+    }
+  };
+
   return (
-    <View style={styles.stepItem}>
-      <View style={styles.stepNumber}>
-        <ThemedText style={styles.stepNumberText}>{number}</ThemedText>
+    <View style={styles.floorPlanContainer}>
+      <View style={styles.floorPlanHeader}>
+        <ThemedText style={styles.floorTitle}>{currentFloor.name}</ThemedText>
+        <View style={styles.floorBadge}>
+          <ThemedText style={styles.floorBadgeText}>Piso {floor}</ThemedText>
+        </View>
       </View>
-      <View style={styles.stepContent}>
-        <ThemedText style={styles.stepTitle}>{title}</ThemedText>
-        <ThemedText style={styles.stepDescription}>{description}</ThemedText>
+      
+      <View style={[styles.floorPlan, { width: planSize, height: planSize * 0.8 }]}>
+        {/* Representación gráfica del plano */}
+        <View style={styles.planBackground}>
+          {/* Corredores */}
+          <View style={[styles.corridor, { top: 130, left: 30, width: planSize - 60, height: 4 }]} />
+          <View style={[styles.corridor, { top: 230, left: 30, width: planSize - 60, height: 4 }]} />
+          
+          {/* Aulas y ubicaciones */}
+          {currentFloor.classrooms.map((room, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.locationPin,
+                {
+                  left: room.x - getLocationSize(room.type) / 2,
+                  top: room.y - getLocationSize(room.type) / 2,
+                  width: getLocationSize(room.type),
+                  height: getLocationSize(room.type),
+                  backgroundColor: getLocationColor(room.type),
+                  borderWidth: room.type === 'user-mesa' ? 3 : 2,
+                  borderColor: room.type === 'user-mesa' ? Colors.primary : Colors.pearl,
+                }
+              ]}
+              onPress={() => onLocationSelect(room.id)}
+            >
+              <Text style={[
+                styles.pinText,
+                { 
+                  fontSize: room.type === 'user-mesa' ? 8 : 6,
+                  color: Colors.pearl,
+                  fontWeight: room.type === 'user-mesa' ? 'bold' : 'normal'
+                }
+              ]}>
+                {room.number}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+      
+      <View style={styles.legend}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: Colors.primary }]} />
+          <ThemedText style={styles.legendText}>Tu Mesa</ThemedText>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: Colors.secondary }]} />
+          <ThemedText style={styles.legendText}>Mesas de Votación</ThemedText>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: Colors.night }]} />
+          <ThemedText style={styles.legendText}>Entrada</ThemedText>
+        </View>
       </View>
     </View>
   );
 };
 
-// Componente principal de votación
-export default function VotingScreen() {
-  const [userLocation] = useState({
-    centerName: 'Colegio Nacional María Parado de Bellido',
+// Componente de instrucciones de navegación
+const LocationStep: React.FC<LocationStepProps> = ({ step, instruction, icon }) => {
+  return (
+    <View style={styles.stepContainer}>
+      <View style={styles.stepNumber}>
+        <ThemedText style={styles.stepNumberText}>{step}</ThemedText>
+      </View>
+      <View style={styles.stepIcon}>
+        <IconSymbol name={icon} size={20} color={Colors.primary} />
+      </View>
+      <ThemedText style={styles.stepInstruction}>{instruction}</ThemedText>
+    </View>
+  );
+};
+
+// Componente principal de ubicación integrada
+export default function IntegratedLocationScreen() {
+  const [currentFloor, setCurrentFloor] = useState(2);
+  const [selectedLocation, setSelectedLocation] = useState<string>('Mesa 45');
+  const [userMesa] = useState('Mesa 45');
+
+  const votingCenter = {
+    name: 'Colegio Nacional María Parado de Bellido',
     address: 'Av. República de Panamá 3555, San Luis 15021',
-    mesa: 'Mesa 45',
-    classroom: 'Aula 203 - Segundo Piso',
-    votingTime: '8:00 AM - 4:00 PM'
-  });
-
-  const handleOpenMaps = () => {
-    const url = `https://maps.google.com/?q=${encodeURIComponent(userLocation.address)}`;
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'No se pudo abrir la aplicación de mapas');
-    });
+    hours: '7:00 AM - 4:00 PM',
+    totalMesas: 50,
+    userMesa: 'Mesa 45',
+    userClassroom: 'Aula 204 - Primer Piso'
   };
 
-  const handleCallEmergency = () => {
-    Linking.openURL('tel:105').catch(() => {
-      Alert.alert('Error', 'No se pudo realizar la llamada');
-    });
+  const navigationSteps = [
+    {
+      step: 1,
+      instruction: 'Ingresa por la entrada principal del colegio',
+      icon: 'entrance'
+    },
+    {
+      step: 2,
+      instruction: 'Dirígete a las escaleras centrales',
+      icon: 'stairs'
+    },
+    {
+      step: 3,
+      instruction: 'Sube al primer piso',
+      icon: 'floor'
+    },
+    {
+      step: 4,
+      instruction: 'Gira a la derecha y busca el Aula 204',
+      icon: 'navigate'
+    },
+    {
+      step: 5,
+      instruction: 'Identifica la Mesa 45 dentro del aula',
+      icon: 'classroom'
+    }
+  ];
+
+  const facilities = [
+    { name: 'Baños', location: 'Planta Baja y Primer Piso', icon: 'restroom' },
+    { name: 'Estacionamiento', location: 'Zona exterior del colegio', icon: 'parking' },
+    { name: 'Área de Espera', location: 'Patio central', icon: 'entrance' },
+    { name: 'Oficina del Jurado', location: 'Aula 103 - Planta Baja', icon: 'office' },
+  ];
+
+  const handleLocationSelect = (location: string) => {
+    setSelectedLocation(location);
+    Alert.alert(
+      'Ubicación Seleccionada',
+      `Has seleccionado: ${location}`,
+      [{ text: 'OK' }]
+    );
   };
 
-  const handleOpenLegalDocs = () => {
-    // Simular apertura de documentos legales
-    Alert.alert('Documentación Legal', 'Se abrirán los documentos legales relevantes');
+  const handleFloorChange = (floor: number) => {
+    setCurrentFloor(floor);
   };
 
   return (
@@ -124,215 +256,148 @@ export default function VotingScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* ESPACIO EN LA PARTE SUPERIOR - AÑADIDO */}
+        <View style={styles.topSpacing} />
+        
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.titleSection}>
             <View style={styles.iconTitleContainer}>
               <View style={styles.iconContainer}>
-                <IconSymbol name="document" size={28} color={Colors.pearl} />
+                <IconSymbol name="building" size={28} color={Colors.pearl} />
               </View>
               <ThemedText type="title" style={styles.mainTitle}>
-                Información para Votar
+                Ubicación de Votación
               </ThemedText>
             </View>
             <ThemedText style={styles.subtitle}>
-              Todo lo que necesitas saber para ejercer tu derecho al voto
+              Encuentra tu mesa de votación dentro del centro electoral
             </ThemedText>
           </View>
         </View>
 
-        {/* Sección de ubicación */}
-        <InfoCard
-          title="Ubicación de Votación"
-          iconName="location"
-          iconColor={Colors.primary}
-          onPress={handleOpenMaps}
-        >
-          <View style={styles.locationInfo}>
-            <View style={styles.locationItem}>
-              <IconSymbol name="location" size={16} color={Colors.primary} />
-              <ThemedText style={styles.locationText}>
-                {userLocation.centerName}
-              </ThemedText>
+        {/* Información del centro */}
+        <View style={styles.centerInfoCard}>
+          <View style={styles.centerHeader}>
+            <IconSymbol name="building" size={24} color={Colors.primary} />
+            <ThemedText style={styles.centerName}>{votingCenter.name}</ThemedText>
+          </View>
+          <View style={styles.centerDetails}>
+            <View style={styles.detailItem}>
+              <IconSymbol name="location" size={16} color={Colors.gray} />
+              <ThemedText style={styles.detailText}>{votingCenter.address}</ThemedText>
             </View>
-            <View style={styles.locationItem}>
-              <IconSymbol name="map" size={16} color={Colors.gray} />
-              <ThemedText style={styles.locationAddress}>
-                {userLocation.address}
-              </ThemedText>
-            </View>
-            <View style={styles.locationItem}>
+            <View style={styles.detailItem}>
               <IconSymbol name="time" size={16} color={Colors.gray} />
-              <ThemedText style={styles.locationTime}>
-                Horario: {userLocation.votingTime}
-              </ThemedText>
+              <ThemedText style={styles.detailText}>Horario: {votingCenter.hours}</ThemedText>
+            </View>
+            <View style={styles.detailItem}>
+              <IconSymbol name="classroom" size={16} color={Colors.gray} />
+              <ThemedText style={styles.detailText}>Tu ubicación: {votingCenter.userClassroom}</ThemedText>
             </View>
           </View>
-          <TouchableOpacity style={styles.mapButton} onPress={handleOpenMaps}>
-            <ThemedText style={styles.mapButtonText}>Abrir en Maps</ThemedText>
-            <IconSymbol name="external-link" size={14} color={Colors.pearl} />
+        </View>
+
+        {/* Selector de pisos */}
+        <View style={styles.floorSelector}>
+          <TouchableOpacity 
+            style={[styles.floorButton, currentFloor === 1 && styles.activeFloor]}
+            onPress={() => handleFloorChange(1)}
+          >
+            <ThemedText style={[styles.floorButtonText, currentFloor === 1 && styles.activeFloorText]}>
+              Planta Baja
+            </ThemedText>
           </TouchableOpacity>
-        </InfoCard>
+          <TouchableOpacity 
+            style={[styles.floorButton, currentFloor === 2 && styles.activeFloor]}
+            onPress={() => handleFloorChange(2)}
+          >
+            <ThemedText style={[styles.floorButtonText, currentFloor === 2 && styles.activeFloorText]}>
+              Primer Piso
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
 
-        {/* Sección de mesa específica */}
-        <InfoCard
-          title="Tu Mesa de Votación"
-          iconName="map"
-          iconColor={Colors.secondary}
-        >
-          <View style={styles.mesaInfo}>
-            <View style={styles.mesaBadge}>
-              <ThemedText style={styles.mesaNumber}>{userLocation.mesa}</ThemedText>
-            </View>
-            <View style={styles.mesaDetails}>
-              <ThemedText style={styles.mesaTitle}>Ubicación dentro del centro:</ThemedText>
-              <ThemedText style={styles.mesaDescription}>{userLocation.classroom}</ThemedText>
-            </View>
+        {/* Plano interactivo */}
+        <View style={styles.planSection}>
+          <View style={styles.sectionHeader}>
+            <IconSymbol name="map" size={20} color={Colors.primary} />
+            <ThemedText style={styles.sectionTitle}>Plano del Centro Electoral</ThemedText>
           </View>
-          <View style={styles.instructions}>
-            <ThemedText style={styles.instructionsTitle}>Al llegar al centro:</ThemedText>
-            <View style={styles.instructionStep}>
-              <IconSymbol name="check" size={14} color={Colors.primary} />
-              <ThemedText style={styles.instructionText}>
-                Busca los letreros con el número de tu mesa
-              </ThemedText>
-            </View>
-            <View style={styles.instructionStep}>
-              <IconSymbol name="check" size={14} color={Colors.primary} />
-              <ThemedText style={styles.instructionText}>
-                Presenta tu DNI al miembro de mesa
-              </ThemedText>
-            </View>
-            <View style={styles.instructionStep}>
-              <IconSymbol name="check" size={14} color={Colors.primary} />
-              <ThemedText style={styles.instructionText}>
-                Firma el acta de votación
-              </ThemedText>
-            </View>
-          </View>
-        </InfoCard>
+          <FloorPlan 
+            floor={currentFloor}
+            userMesa={votingCenter.userMesa}
+            onLocationSelect={handleLocationSelect}
+          />
+        </View>
 
-        {/* Instrucciones de cédula */}
-        <InfoCard
-          title="Instrucciones para Votar"
-          iconName="document"
-          iconColor={Colors.primary}
-        >
-          <View style={styles.stepsContainer}>
-            <StepItem
-              number={1}
-              title="Marca tu voto"
-              description="Usa el lapicero proporcionado para marcar claramente tu preferencia en la cédula"
-            />
-            <StepItem
-              number={2}
-              title="Doble la cédula"
-              description="Dobla la cédula por la mitad para mantener el secreto del voto"
-            />
-            <StepItem
-              number={3}
-              title="Deposita en la urna"
-              description="Coloca tu cédula doblada en la urna correspondiente"
-            />
-            <StepItem
-              number={4}
-              title="Marca tu dedo"
-              description="Permite que el miembro de mesa marque tu dedo con tinta indeleble"
-            />
+        {/* Instrucciones de navegación */}
+        <View style={styles.navigationSection}>
+          <View style={styles.sectionHeader}>
+            <IconSymbol name="navigate" size={20} color={Colors.secondary} />
+            <ThemedText style={styles.sectionTitle}>Cómo Llegar a Tu Mesa</ThemedText>
           </View>
           
-          <View style={styles.importantNote}>
+          <View style={styles.stepsContainer}>
+            {navigationSteps.map((step, index) => (
+              <LocationStep
+                key={index}
+                step={step.step}
+                instruction={step.instruction}
+                icon={step.icon}
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* Servicios e instalaciones */}
+        <View style={styles.facilitiesSection}>
+          <View style={styles.sectionHeader}>
+            <IconSymbol name="info" size={20} color={Colors.night} />
+            <ThemedText style={styles.sectionTitle}>Servicios Disponibles</ThemedText>
+          </View>
+          
+          <View style={styles.facilitiesGrid}>
+            {facilities.map((facility, index) => (
+              <View key={index} style={styles.facilityCard}>
+                <View style={styles.facilityIcon}>
+                  <IconSymbol name={facility.icon} size={20} color={Colors.primary} />
+                </View>
+                <View style={styles.facilityInfo}>
+                  <ThemedText style={styles.facilityName}>{facility.name}</ThemedText>
+                  <ThemedText style={styles.facilityLocation}>{facility.location}</ThemedText>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Información adicional */}
+        <View style={styles.additionalInfo}>
+          <View style={styles.infoItem}>
             <IconSymbol name="info" size={16} color={Colors.primary} />
-            <ThemedText style={styles.noteText}>
-              Recuerda: Tu voto es secreto. Nadie puede obligarte a revelar por quién votaste.
+            <ThemedText style={styles.infoText}>
+              Llega con 30 minutos de anticipación para evitar aglomeraciones
             </ThemedText>
           </View>
-        </InfoCard>
-
-        {/* Recomendaciones de seguridad */}
-        <InfoCard
-          title="Recomendaciones de Seguridad"
-          iconName="shield"
-          iconColor={Colors.secondary}
-        >
-          <View style={styles.securityList}>
-            <View style={styles.securityItem}>
-              <IconSymbol name="warning" size={16} color={Colors.secondary} />
-              <ThemedText style={styles.securityText}>
-                Lleva solo tu DNI. Evita llevar objetos de valor
-              </ThemedText>
-            </View>
-            <View style={styles.securityItem}>
-              <IconSymbol name="warning" size={16} color={Colors.secondary} />
-              <ThemedText style={styles.securityText}>
-                Respeta las filas y mantén la calma
-              </ThemedText>
-            </View>
-            <View style={styles.securityItem}>
-              <IconSymbol name="warning" size={16} color={Colors.secondary} />
-              <ThemedText style={styles.securityText}>
-                No tomes fotos dentro de la cabina de votación
-              </ThemedText>
-            </View>
-            <View style={styles.securityItem}>
-              <IconSymbol name="warning" size={16} color={Colors.secondary} />
-              <ThemedText style={styles.securityText}>
-                Denuncia cualquier irregularidad a las autoridades
-              </ThemedText>
-            </View>
+          <View style={styles.infoItem}>
+            <IconSymbol name="info" size={16} color={Colors.primary} />
+            <ThemedText style={styles.infoText}>
+              Porta solo tu DNI original. No se aceptan fotocopias
+            </ThemedText>
           </View>
-          
-          <TouchableOpacity style={styles.emergencyButton} onPress={handleCallEmergency}>
-            <IconSymbol name="shield" size={16} color={Colors.pearl} />
-            <ThemedText style={styles.emergencyButtonText}>Llamar a Emergencias (105)</ThemedText>
-          </TouchableOpacity>
-        </InfoCard>
-
-        {/* Marco legal */}
-        <InfoCard
-          title="Marco Legal Electoral"
-          iconName="scale"
-          iconColor={Colors.night}
-          onPress={handleOpenLegalDocs}
-        >
-          <ThemedText style={styles.legalText}>
-            Tu voto está protegido por las siguientes normas legales:
-          </ThemedText>
-          
-          <View style={styles.lawsList}>
-            <View style={styles.lawItem}>
-              <ThemedText style={styles.lawTitle}>Ley Orgánica de Elecciones</ThemedText>
-              <ThemedText style={styles.lawDescription}>
-                Establece los principios fundamentales del proceso electoral
-              </ThemedText>
-            </View>
-            <View style={styles.lawItem}>
-              <ThemedText style={styles.lawTitle}>Código Electoral</ThemedText>
-              <ThemedText style={styles.lawDescription}>
-                Regula el ejercicio del derecho al sufragio
-              </ThemedText>
-            </View>
-            <View style={styles.lawItem}>
-              <ThemedText style={styles.lawTitle}>Ley de Partidos Políticos</ThemedText>
-              <ThemedText style={styles.lawDescription}>
-                Norma la participación de organizaciones políticas
-              </ThemedText>
-            </View>
+          <View style={styles.infoItem}>
+            <IconSymbol name="info" size={16} color={Colors.primary} />
+            <ThemedText style={styles.infoText}>
+              Si tienes movilidad reducida, solicita asistencia en la entrada
+            </ThemedText>
           </View>
-          
-          <TouchableOpacity style={styles.legalButton} onPress={handleOpenLegalDocs}>
-            <ThemedText style={styles.legalButtonText}>Consultar Documentos Legales</ThemedText>
-            <IconSymbol name="external-link" size={14} color={Colors.pearl} />
-          </TouchableOpacity>
-        </InfoCard>
+        </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <ThemedText style={styles.footerText}>
-            Ejerce tu derecho al voto de manera informada y segura
-          </ThemedText>
-          <ThemedText style={styles.footerSubtext}>
-            Jornada Electoral - {new Date().getFullYear()}
+            Ubicación integrada - No se requiere aplicación externa
           </ThemedText>
         </View>
       </ScrollView>
@@ -347,7 +412,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingTop: 10, // Reducido el padding superior
+    paddingBottom: 20,
+  },
+  // NUEVO ESTILO PARA ESPACIO SUPERIOR
+  topSpacing: {
+    height: 50, // Ajusta este valor para subir/bajar el contenido
   },
   header: {
     marginBottom: 24,
@@ -386,151 +456,191 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginLeft: 62,
   },
-  infoCard: {
+  centerInfoCard: {
     backgroundColor: Colors.pearl,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
-    shadowColor: Colors.night,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: Colors.lightGray,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  cardHeader: {
+  centerHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  cardIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  cardTitleContainer: {
-    flex: 1,
-  },
-  cardTitle: {
+  centerName: {
     fontSize: 18,
     fontWeight: '700',
     color: Colors.night,
-  },
-  cardContent: {
-    // Contenido específico de cada card
-  },
-  locationInfo: {
-    marginBottom: 16,
-  },
-  locationItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  locationText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.night,
     marginLeft: 8,
     flex: 1,
   },
-  locationAddress: {
+  centerDetails: {
+    gap: 8,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  detailText: {
     fontSize: 14,
     color: Colors.gray,
     marginLeft: 8,
     flex: 1,
     lineHeight: 20,
   },
-  locationTime: {
-    fontSize: 14,
-    color: Colors.gray,
-    marginLeft: 8,
-    flex: 1,
-  },
-  mapButton: {
+  floorSelector: {
     flexDirection: 'row',
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 16,
+    marginBottom: 20,
+    gap: 8,
+  },
+  floorButton: {
+    flex: 1,
     paddingVertical: 12,
     borderRadius: 12,
+    backgroundColor: Colors.lightGray,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  mapButtonText: {
-    color: Colors.pearl,
-    fontWeight: '600',
+  activeFloor: {
+    backgroundColor: Colors.primary,
+  },
+  floorButtonText: {
     fontSize: 14,
-    marginRight: 8,
+    fontWeight: '600',
+    color: Colors.gray,
   },
-  mesaInfo: {
+  activeFloorText: {
+    color: Colors.pearl,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
-  mesaBadge: {
-    backgroundColor: Colors.secondary,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
-    marginRight: 12,
-  },
-  mesaNumber: {
-    color: Colors.pearl,
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: '700',
-    fontSize: 16,
-  },
-  mesaDetails: {
-    flex: 1,
-  },
-  mesaTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.night,
-    marginBottom: 4,
-  },
-  mesaDescription: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.secondary,
-  },
-  instructions: {
-    backgroundColor: Colors.primary + '08',
-    padding: 16,
-    borderRadius: 12,
-  },
-  instructionsTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.night,
-    marginBottom: 8,
-  },
-  instructionStep: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 6,
-  },
-  instructionText: {
-    fontSize: 14,
     color: Colors.night,
     marginLeft: 8,
-    flex: 1,
-    lineHeight: 20,
   },
-  stepsContainer: {
+  planSection: {
+    marginBottom: 24,
+  },
+  floorPlanContainer: {
+    backgroundColor: Colors.pearl,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  floorPlanHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
   },
-  stepItem: {
+  floorTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.night,
+  },
+  floorBadge: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  floorBadgeText: {
+    color: Colors.pearl,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  floorPlan: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.lightGray,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  planBackground: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  corridor: {
+    backgroundColor: Colors.lightGray,
+    position: 'absolute',
+  },
+  locationPin: {
+    position: 'absolute',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  pinText: {
+    color: Colors.pearl,
+    fontWeight: '600',
+  },
+  legend: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  legendColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 6,
+  },
+  legendText: {
+    fontSize: 12,
+    color: Colors.gray,
+  },
+  navigationSection: {
+    marginBottom: 24,
+  },
+  stepsContainer: {
+    backgroundColor: Colors.pearl,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  stepContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
   },
   stepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -538,123 +648,93 @@ const styles = StyleSheet.create({
   },
   stepNumberText: {
     color: Colors.pearl,
+    fontSize: 12,
     fontWeight: '700',
-    fontSize: 14,
   },
-  stepContent: {
-    flex: 1,
-  },
-  stepTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.night,
-    marginBottom: 4,
-  },
-  stepDescription: {
-    fontSize: 14,
-    color: Colors.gray,
-    lineHeight: 20,
-  },
-  importantNote: {
-    flexDirection: 'row',
-    backgroundColor: Colors.primary + '15',
-    padding: 12,
+  stepIcon: {
+    width: 32,
+    height: 32,
     borderRadius: 8,
-    alignItems: 'flex-start',
-  },
-  noteText: {
-    fontSize: 14,
-    color: Colors.night,
-    marginLeft: 8,
-    flex: 1,
-    lineHeight: 20,
-    fontStyle: 'italic',
-  },
-  securityList: {
-    marginBottom: 16,
-  },
-  securityItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  securityText: {
-    fontSize: 14,
-    color: Colors.night,
-    marginLeft: 8,
-    flex: 1,
-    lineHeight: 20,
-  },
-  emergencyButton: {
-    flexDirection: 'row',
-    backgroundColor: Colors.secondary,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
+    backgroundColor: Colors.primary + '20',
     justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  emergencyButtonText: {
-    color: Colors.pearl,
-    fontWeight: '600',
-    fontSize: 14,
-    marginLeft: 8,
-  },
-  legalText: {
+  stepInstruction: {
+    flex: 1,
     fontSize: 14,
     color: Colors.night,
-    marginBottom: 12,
     lineHeight: 20,
   },
-  lawsList: {
-    marginBottom: 16,
+  facilitiesSection: {
+    marginBottom: 24,
   },
-  lawItem: {
-    backgroundColor: Colors.night + '08',
+  facilitiesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  facilityCard: {
+    width: '48%',
+    backgroundColor: Colors.pearl,
+    borderRadius: 12,
     padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  facilityIcon: {
+    width: 36,
+    height: 36,
     borderRadius: 8,
+    backgroundColor: Colors.primary + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  lawTitle: {
+  facilityInfo: {
+    flex: 1,
+  },
+  facilityName: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.night,
     marginBottom: 4,
   },
-  lawDescription: {
-    fontSize: 13,
+  facilityLocation: {
+    fontSize: 12,
     color: Colors.gray,
-    lineHeight: 18,
+    lineHeight: 16,
   },
-  legalButton: {
-    flexDirection: 'row',
-    backgroundColor: Colors.night,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  additionalInfo: {
+    backgroundColor: Colors.primary + '08',
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 16,
+    marginBottom: 24,
   },
-  legalButtonText: {
-    color: Colors.pearl,
-    fontWeight: '600',
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  infoText: {
     fontSize: 14,
-    marginRight: 8,
+    color: Colors.night,
+    marginLeft: 8,
+    flex: 1,
+    lineHeight: 20,
   },
   footer: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: 16,
     borderTopWidth: 1,
     borderTopColor: Colors.lightGray,
-    marginTop: 8,
   },
   footerText: {
-    textAlign: 'center',
-    color: Colors.gray,
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  footerSubtext: {
     textAlign: 'center',
     color: Colors.gray,
     fontSize: 12,
