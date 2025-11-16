@@ -16,7 +16,7 @@ import partidosData, { PartidoPolitico } from '../../data/partidos';
 import { ThemedText } from '../themed-text';
 import { ThemedView } from '../themed-view';
 
-// Importa tu imagen local de aforo - AJUSTA LA RUTA SEGÚN TU PROYECTO
+// Importa tu imagen local de aforo
 import aforoImage from '../../assets/images/CuyPresidente.jpeg';
 
 // Función para generar color basado en el nombre del partido
@@ -47,32 +47,9 @@ const generatePartyColor = (partyName: string): string => {
   return colors[Math.abs(hash) % colors.length];
 };
 
-// Función para generar slogan basado en el nombre del partido
-const generateSlogan = (partyName: string): string => {
-  const slogans = [
-    "Por un Perú mejor",
-    "Juntos hacia el futuro",
-    "La fuerza del cambio",
-    "Unidos por el progreso",
-    "Trabajo y desarrollo",
-    "Innovación y tradición",
-    "Justicia y equidad",
-    "Libertad y responsabilidad",
-    "Patria y progreso",
-    "Educación y valores"
-  ];
-  
-  const hash = partyName.split('').reduce((a, b) => {
-    a = ((a << 5) - a) + b.charCodeAt(0);
-    return a & a;
-  }, 0);
-  
-  return slogans[Math.abs(hash) % slogans.length];
-};
-
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = width * 0.78;
-const CARD_GAP = 16;
+const CARD_WIDTH = width * 0.85;
+const CARD_GAP = 12;
 const SPACER = (width - CARD_WIDTH) / 2;
 
 interface CandidateCardProps {
@@ -83,7 +60,7 @@ interface CandidateCardProps {
   onViewPlan: (party: PartidoPolitico) => void;
 }
 
-// Componente para cada tarjeta de candidato/partido
+// Componente para cada tarjeta de candidato/partido - DISEÑO COMPLETAMENTE REDISEÑADO
 const CandidateCard: React.FC<CandidateCardProps> = ({ 
   party, 
   scrollX, 
@@ -92,7 +69,6 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   onViewPlan
 }) => {
   const partyColor = generatePartyColor(party.name);
-  const slogan = generateSlogan(party.name);
 
   // Animación para la tarjeta centrada
   const inputRange = [
@@ -103,13 +79,13 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
 
   const scale = scrollX?.interpolate({
     inputRange,
-    outputRange: [0.92, 1, 0.92],
+    outputRange: [0.90, 1, 0.90],
     extrapolate: 'clamp',
   });
 
   const opacity = scrollX?.interpolate({
     inputRange,
-    outputRange: [0.7, 1, 0.7],
+    outputRange: [0.6, 1, 0.6],
     extrapolate: 'clamp',
   });
 
@@ -119,63 +95,117 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
       opacity: opacity || 1,
     }}>
       <View style={styles.card}>
-        {/* Sección de aforo de votación - MISMA IMAGEN PARA TODOS */}
-        <View style={[styles.aforoContainer, { backgroundColor: partyColor }]}>
-          <Image 
-            source={aforoImage} 
-            style={styles.aforoImage}
-            resizeMode="cover"
-          />
-          <View style={styles.aforoOverlay}>
-            <ThemedText style={styles.aforoTitle}>Aforo de Sufragio</ThemedText>
-            <ThemedText style={styles.aforoSubtitle}>Elecciones 2024</ThemedText>
-          </View>
-        </View>
-        
-        {/* Información del partido */}
-        <View style={styles.cardContent}>
-          <ThemedText style={styles.partyName}>{party.name}</ThemedText>
-          <ThemedText style={styles.candidateName}>
-            {party.president}
-          </ThemedText>
-          
-          {/* Línea divisora */}
-          <View style={[styles.divider, { backgroundColor: partyColor }]} />
-          
-          <ThemedText style={styles.slogan}>
-            "{slogan}"
-          </ThemedText>
-
-          {/* Botones de acción */}
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity 
-              style={[styles.actionButton, { backgroundColor: partyColor }]}
-              onPress={() => onViewProposals(party)}
-            >
-              <ThemedText style={styles.actionButtonText}>
-                Propuestas ({party.propuestas.length})
-              </ThemedText>
-            </TouchableOpacity>
+        {/* HEADER CON LOGO Y COLOR DEL PARTIDO */}
+        <View style={[styles.cardHeader, { backgroundColor: partyColor }]}>
+          <View style={styles.headerContent}>
+            {/* Logo del partido */}
+            <View style={styles.logoContainer}>
+              {party.logo ? (
+                <Image 
+                  source={party.logo} 
+                  style={styles.partyLogo}
+                  resizeMode="contain"
+                />
+              ) : (
+                <View style={styles.fallbackLogo}>
+                  <ThemedText style={styles.fallbackLogoText}>
+                    {party.name.split(' ').map(word => word[0]).join('').substring(0, 3)}
+                  </ThemedText>
+                </View>
+              )}
+            </View>
             
-            <TouchableOpacity 
-              style={[styles.actionButton, { borderColor: partyColor, backgroundColor: Colors.pearl }]}
-              onPress={() => onViewPlan(party)}
-            >
-              <ThemedText style={[styles.actionButtonText, { color: partyColor }]}>
-                Plan de Gobierno ({party.planes.length})
-              </ThemedText>
-            </TouchableOpacity>
+            {/* Información principal */}
+            <View style={styles.partyInfo}>
+              <ThemedText style={styles.partyName}>{party.name}</ThemedText>
+              <ThemedText style={styles.presidentName}>{party.president}</ThemedText>
+              <View style={styles.statsContainer}>
+                <View style={styles.stat}>
+                  <ThemedText style={styles.statNumber}>{party.propuestas.length}</ThemedText>
+                  <ThemedText style={styles.statLabel}>Propuestas</ThemedText>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.stat}>
+                  <ThemedText style={styles.statNumber}>{party.planes.length}</ThemedText>
+                  <ThemedText style={styles.statLabel}>Planes</ThemedText>
+                </View>
+              </View>
+            </View>
           </View>
         </View>
-        
-        {/* Borde inferior decorativo */}
-        <View style={[styles.cardBorder, { backgroundColor: partyColor }]} />
+
+        {/* CONTENIDO PRINCIPAL */}
+        <ScrollView 
+          style={styles.cardContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Propuestas destacadas */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={styles.sectionTitle}>Propuestas Principales</ThemedText>
+              <View style={[styles.sectionIndicator, { backgroundColor: partyColor }]} />
+            </View>
+            {party.propuestas.slice(0, 3).map((propuesta, idx) => (
+              <View key={idx} style={styles.proposalItem}>
+                <View style={[styles.proposalBullet, { backgroundColor: partyColor }]} />
+                <ThemedText style={styles.proposalText}>{propuesta}</ThemedText>
+              </View>
+            ))}
+            {party.propuestas.length > 3 && (
+              <ThemedText style={styles.moreText}>
+                +{party.propuestas.length - 3} propuestas más
+              </ThemedText>
+            )}
+          </View>
+
+          {/* Planes de gobierno */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={styles.sectionTitle}>Planes de Gobierno</ThemedText>
+              <View style={[styles.sectionIndicator, { backgroundColor: partyColor }]} />
+            </View>
+            {party.planes.slice(0, 2).map((plan, idx) => (
+              <View key={idx} style={styles.planItem}>
+                <View style={[styles.planIcon, { backgroundColor: partyColor }]}>
+                  <ThemedText style={styles.planIconText}>📋</ThemedText>
+                </View>
+                <ThemedText style={styles.planText}>{plan}</ThemedText>
+              </View>
+            ))}
+            {party.planes.length > 2 && (
+              <ThemedText style={styles.moreText}>
+                +{party.planes.length - 2} planes más
+              </ThemedText>
+            )}
+          </View>
+        </ScrollView>
+
+        {/* BOTONES DE ACCIÓN */}
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.proposalsButton, { borderColor: partyColor }]}
+            onPress={() => onViewProposals(party)}
+          >
+            <ThemedText style={[styles.actionButtonText, { color: partyColor }]}>
+              Ver Todas las Propuestas
+            </ThemedText>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.planButton, { backgroundColor: partyColor }]}
+            onPress={() => onViewPlan(party)}
+          >
+            <ThemedText style={styles.actionButtonText}>
+              Plan de Gobierno Completo
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
       </View>
     </Animated.View>
   );
 };
 
-// Componente Modal para Propuestas
+// Componente Modal para Propuestas (MEJORADO)
 const PropuestasModal: React.FC<{
   visible: boolean;
   party: PartidoPolitico | null;
@@ -193,25 +223,34 @@ const PropuestasModal: React.FC<{
       onRequestClose={onClose}
     >
       <ThemedView style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <ThemedText style={styles.modalTitle}>Propuestas</ThemedText>
-          <ThemedText style={styles.modalSubtitle}>{party.name}</ThemedText>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <ThemedText style={styles.closeButtonText}>✕</ThemedText>
-          </TouchableOpacity>
+        <View style={[styles.modalHeader, { backgroundColor: partyColor }]}>
+          <View style={styles.modalHeaderContent}>
+            <View>
+              <ThemedText style={styles.modalTitle}>Propuestas Detalladas</ThemedText>
+              <ThemedText style={styles.modalSubtitle}>{party.name}</ThemedText>
+            </View>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <ThemedText style={styles.closeButtonText}>✕</ThemedText>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <ScrollView style={styles.modalContent}>
-          <View style={[styles.sectionHeader, { backgroundColor: partyColor }]}>
-            <ThemedText style={styles.sectionTitle}>
-              Principales Propuestas ({party.propuestas.length})
-            </ThemedText>
+          <View style={styles.modalStats}>
+            <View style={styles.modalStat}>
+              <ThemedText style={styles.modalStatNumber}>{party.propuestas.length}</ThemedText>
+              <ThemedText style={styles.modalStatLabel}>Propuestas Totales</ThemedText>
+            </View>
           </View>
-          
+
           {party.propuestas.map((propuesta, index) => (
-            <View key={index} style={styles.listItem}>
-              <View style={[styles.bullet, { backgroundColor: partyColor }]} />
-              <ThemedText style={styles.listText}>{propuesta}</ThemedText>
+            <View key={index} style={styles.modalListItem}>
+              <View style={[styles.modalNumber, { backgroundColor: partyColor }]}>
+                <ThemedText style={styles.modalNumberText}>{index + 1}</ThemedText>
+              </View>
+              <View style={styles.modalTextContent}>
+                <ThemedText style={styles.modalListItemText}>{propuesta}</ThemedText>
+              </View>
             </View>
           ))}
         </ScrollView>
@@ -220,7 +259,7 @@ const PropuestasModal: React.FC<{
   );
 };
 
-// Componente Modal para Plan de Gobierno
+// Componente Modal para Plan de Gobierno (MEJORADO)
 const PlanModal: React.FC<{
   visible: boolean;
   party: PartidoPolitico | null;
@@ -238,25 +277,35 @@ const PlanModal: React.FC<{
       onRequestClose={onClose}
     >
       <ThemedView style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <ThemedText style={styles.modalTitle}>Plan de Gobierno</ThemedText>
-          <ThemedText style={styles.modalSubtitle}>{party.name}</ThemedText>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <ThemedText style={styles.closeButtonText}>✕</ThemedText>
-          </TouchableOpacity>
+        <View style={[styles.modalHeader, { backgroundColor: partyColor }]}>
+          <View style={styles.modalHeaderContent}>
+            <View>
+              <ThemedText style={styles.modalTitle}>Plan de Gobierno</ThemedText>
+              <ThemedText style={styles.modalSubtitle}>{party.name}</ThemedText>
+            </View>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <ThemedText style={styles.closeButtonText}>✕</ThemedText>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <ScrollView style={styles.modalContent}>
-          <View style={[styles.sectionHeader, { backgroundColor: partyColor }]}>
-            <ThemedText style={styles.sectionTitle}>
-              Planes de Gobierno ({party.planes.length})
-            </ThemedText>
+          <View style={styles.modalStats}>
+            <View style={styles.modalStat}>
+              <ThemedText style={styles.modalStatNumber}>{party.planes.length}</ThemedText>
+              <ThemedText style={styles.modalStatLabel}>Planes Estratégicos</ThemedText>
+            </View>
           </View>
-          
+
           {party.planes.map((plan, index) => (
-            <View key={index} style={styles.listItem}>
-              <View style={[styles.bullet, { backgroundColor: partyColor }]} />
-              <ThemedText style={styles.listText}>{plan}</ThemedText>
+            <View key={index} style={styles.modalPlanItem}>
+              <View style={[styles.modalPlanIcon, { backgroundColor: partyColor }]}>
+                <ThemedText style={styles.modalPlanIconText}>🎯</ThemedText>
+              </View>
+              <View style={styles.modalPlanContent}>
+                <ThemedText style={styles.modalPlanTitle}>Plan Estratégico {index + 1}</ThemedText>
+                <ThemedText style={styles.modalPlanText}>{plan}</ThemedText>
+              </View>
             </View>
           ))}
         </ScrollView>
@@ -265,6 +314,7 @@ const PlanModal: React.FC<{
   );
 };
 
+// El resto del componente CandidatesScreen se mantiene igual...
 interface CandidatesScreenProps {
   onViewProposals?: (party: PartidoPolitico) => void;
   onViewPlan?: (party: PartidoPolitico) => void;
@@ -402,7 +452,7 @@ export default function CandidatesScreen({
           </ThemedText>
           <View style={styles.offlineBadge}>
             <ThemedText style={styles.offlineBadgeText}>
-              📱 Datos Locales - {parties.length} partidos cargados
+              📱 {parties.length} partidos cargados
             </ThemedText>
           </View>
         </View>
@@ -603,116 +653,314 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 20,
   },
+  // NUEVOS ESTILOS PARA EL CARD REDISEÑADO
   card: {
     width: CARD_WIDTH,
-    height: 480,
-    borderRadius: 24,
+    height: 520,
+    borderRadius: 20,
     overflow: 'hidden',
     marginHorizontal: CARD_GAP / 2,
     backgroundColor: Colors.pearl,
-    elevation: 8,
+    elevation: 12,
     shadowColor: Colors.night,
-    shadowOffset: { width: 0, height: 12 },
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
-    shadowRadius: 20,
+    shadowRadius: 16,
     borderWidth: 1,
     borderColor: Colors.lightGray,
   },
-  // Nuevos estilos para la sección de aforo
-  aforoContainer: {
-    height: 200,
+  cardHeader: {
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    backgroundColor: Colors.pearl,
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
-    position: 'relative',
+    marginRight: 16,
+    elevation: 4,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  aforoImage: {
-    width: '50%',
-    height: '100%',
-    opacity: 0.8,
+  partyLogo: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
   },
-  aforoOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  fallbackLogo: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: Colors.lightGray,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
   },
-  aforoTitle: {
-    fontSize: 24,
+  fallbackLogoText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: Colors.night,
+  },
+  partyInfo: {
+    flex: 1,
+  },
+  partyName: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: Colors.pearl,
-    textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  aforoSubtitle: {
-    fontSize: 16,
+  presidentName: {
+    fontSize: 14,
     color: Colors.pearl,
-    textAlign: 'center',
-    fontWeight: '600',
+    opacity: 0.9,
+    marginBottom: 12,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stat: {
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.pearl,
+  },
+  statLabel: {
+    fontSize: 10,
+    color: Colors.pearl,
+    opacity: 0.8,
+    marginTop: 2,
+  },
+  statDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: Colors.pearl,
+    opacity: 0.3,
+    marginHorizontal: 16,
   },
   cardContent: {
     flex: 1,
-    padding: 24,
-    justifyContent: 'space-between',
+    padding: 16,
   },
-  partyName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.night,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  candidateName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.gray,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  divider: {
-    width: 60,
-    height: 3,
-    borderRadius: 2,
-    marginBottom: 16,
-    alignSelf: 'center',
-  },
-  slogan: {
-    fontSize: 14,
-    color: Colors.gray,
-    fontStyle: 'italic',
-    lineHeight: 20,
-    textAlign: 'center',
+  section: {
     marginBottom: 20,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.night,
+    marginRight: 8,
+  },
+  sectionIndicator: {
+    flex: 1,
+    height: 2,
+    borderRadius: 1,
+  },
+  proposalItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  proposalBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginTop: 6,
+    marginRight: 12,
+  },
+  proposalText: {
+    flex: 1,
+    fontSize: 13,
+    color: Colors.night,
+    lineHeight: 18,
+  },
+  planItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    backgroundColor: Colors.lightGray,
+    padding: 12,
+    borderRadius: 8,
+  },
+  planIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  planIconText: {
+    fontSize: 14,
+  },
+  planText: {
+    flex: 1,
+    fontSize: 13,
+    color: Colors.night,
+    fontWeight: '500',
+  },
+  moreText: {
+    fontSize: 12,
+    color: Colors.gray,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 8,
+  },
   actionsContainer: {
-    gap: 12,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+    gap: 8,
   },
   actionButton: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 10,
     alignItems: 'center',
-    shadowColor: Colors.night,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
     borderWidth: 2,
+  },
+  proposalsButton: {
+    backgroundColor: 'transparent',
+  },
+  planButton: {
+    backgroundColor: Colors.primary,
   },
   actionButtonText: {
     fontSize: 14,
     fontWeight: '600',
   },
-  cardBorder: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 4,
+  // Estilos para modales mejorados
+  modalContainer: {
+    flex: 1,
+    backgroundColor: Colors.pearl,
+  },
+  modalHeader: {
+    padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+  },
+  modalHeaderContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.pearl,
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: Colors.pearl,
+    opacity: 0.9,
+  },
+  closeButton: {
+    padding: 8,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: Colors.pearl,
+    fontWeight: 'bold',
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  modalStats: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalStat: {
+    alignItems: 'center',
+  },
+  modalStatNumber: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: Colors.night,
+  },
+  modalStatLabel: {
+    fontSize: 14,
+    color: Colors.gray,
+    marginTop: 4,
+  },
+  modalListItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+    backgroundColor: Colors.lightGray,
+    padding: 16,
+    borderRadius: 12,
+  },
+  modalNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  modalNumberText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: Colors.pearl,
+  },
+  modalTextContent: {
+    flex: 1,
+  },
+  modalListItemText: {
+    fontSize: 14,
+    color: Colors.night,
+    lineHeight: 20,
+  },
+  modalPlanItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+    backgroundColor: Colors.lightGray,
+    padding: 16,
+    borderRadius: 12,
+  },
+  modalPlanIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  modalPlanIconText: {
+    fontSize: 16,
+  },
+  modalPlanContent: {
+    flex: 1,
+  },
+  modalPlanTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: Colors.night,
+    marginBottom: 4,
+  },
+  modalPlanText: {
+    fontSize: 14,
+    color: Colors.night,
+    lineHeight: 20,
   },
   currentInfo: {
     alignItems: 'center',
@@ -757,75 +1005,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.gray,
     fontWeight: '500',
-  },
-  // Estilos para modales
-  modalContainer: {
-    flex: 1,
-    backgroundColor: Colors.pearl,
-  },
-  modalHeader: {
-    padding: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.night,
-    marginBottom: 4,
-  },
-  modalSubtitle: {
-    fontSize: 16,
-    color: Colors.gray,
-    textAlign: 'center',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 60 : 40,
-    right: 20,
-    padding: 8,
-  },
-  closeButtonText: {
-    fontSize: 20,
-    color: Colors.night,
-    fontWeight: 'bold',
-  },
-  modalContent: {
-    flex: 1,
-    padding: 20,
-  },
-  sectionHeader: {
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.pearl,
-    textAlign: 'center',
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
-  },
-  bullet: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginTop: 6,
-    marginRight: 12,
-  },
-  listText: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.night,
-    lineHeight: 22,
   },
 });

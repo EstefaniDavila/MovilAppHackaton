@@ -183,8 +183,13 @@ const formatDate = (dateString: string) => {
   }
 };
 
-// Función para generar imagen aleatoria basada en el tipo de noticia
+// Función MEJORADA para generar imagen aleatoria basada en el tipo de noticia
 const generateNewsImage = (news: NewsItem) => {
+  // Si ya tiene una imagen y no está vacía, usarla
+  if (news.image && news.image.trim() !== '') {
+    return news.image;
+  }
+  
   // Para noticias oficiales, usar imágenes específicas de gobierno/elecciones
   if (news.isOfficial) {
     const index = Math.abs(news.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % OFFICIAL_IMAGES.length;
@@ -196,8 +201,10 @@ const generateNewsImage = (news: NewsItem) => {
   return ELECTION_IMAGES[index];
 };
 
-// Componente Card de Noticia mejorado
+// Componente Card de Noticia MEJORADO con manejo robusto de imágenes
 const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
+  const [imageError, setImageError] = useState(false);
+  
   const getCategoryColor = () => {
     switch (news.category) {
       case 'OFICIAL':
@@ -216,6 +223,14 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
   const isUserPartyNews = news.partyId === USER_DATA.userParty;
   const isFollowedPartyNews = USER_DATA.followedParties.includes(news.partyId || '');
 
+  // Función para obtener imagen de respaldo
+  const getFallbackImage = () => {
+    if (news.isOfficial) {
+      return OFFICIAL_IMAGES[0];
+    }
+    return ELECTION_IMAGES[0];
+  };
+
   return (
     <TouchableOpacity 
       style={styles.card}
@@ -224,9 +239,10 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
     >
       <View style={styles.imageContainer}>
         <Image 
-          source={{ uri: news.image }} 
+          source={{ uri: imageError ? getFallbackImage() : news.image }} 
           style={styles.cardImage}
-          defaultSource={{ uri: 'https://images.unsplash.com/photo-1551135049-8a33b42738b7?w=600&h=400&fit=crop' }}
+          defaultSource={{ uri: ELECTION_IMAGES[0] }}
+          onError={() => setImageError(true)}
         />
         <View style={styles.imageOverlay} />
         
@@ -330,8 +346,9 @@ export default function NewsScreen() {
   const [allNews, setAllNews] = useState<NewsItem[]>([]);
   const [filteredNews, setFilteredNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set());
 
-  // Función para cargar noticias desde las APIs
+  // Función MEJORADA para cargar noticias desde las APIs
   const loadNews = async () => {
     try {
       setLoading(true);
@@ -344,63 +361,66 @@ export default function NewsScreen() {
       const politicalResponse = await fetch(`${API_URL}/api/v1/admin/posts/political`);
       const politicalData: PoliticalPost[] = await politicalResponse.json();
 
-      // Transformar datos del admin
-      const adminNews: NewsItem[] = adminData.map(post => ({
-        id: post.id,
-        title: post.title,
-        body: post.body,
-        source: 'Organismo Electoral Oficial',
-        date: formatDate(post.created_at),
-        image: generateNewsImage({
+      // Transformar datos del admin - GARANTIZANDO IMÁGENES
+      const adminNews: NewsItem[] = adminData.map(post => {
+        const baseNewsItem = {
           id: post.id,
           title: post.title,
           body: post.body,
           source: 'Organismo Electoral Oficial',
           date: formatDate(post.created_at),
-          image: '',
+          image: '', // Inicialmente vacío
           isOfficial: true,
           category: 'OFICIAL',
           created_at: post.created_at
-        }),
-        isOfficial: true,
-        category: 'OFICIAL',
-        created_at: post.created_at
-      }));
+        };
+        
+        return {
+          ...baseNewsItem,
+          image: generateNewsImage(baseNewsItem) // Generar imagen aquí
+        };
+      });
 
-      // Transformar datos de partidos políticos
-      const politicalNews: NewsItem[] = politicalData.map(post => ({
-        id: post.id,
-        title: post.title,
-        body: post.body,
-        source: post.political_party_name,
-        date: formatDate(post.created_at),
-        image: generateNewsImage({
+      // Transformar datos de partidos políticos - GARANTIZANDO IMÁGENES
+      const politicalNews: NewsItem[] = politicalData.map(post => {
+        const baseNewsItem = {
           id: post.id,
           title: post.title,
           body: post.body,
           source: post.political_party_name,
           date: formatDate(post.created_at),
-          image: '',
+          image: '', // Inicialmente vacío
           isOfficial: false,
           category: 'PARTIDO',
           partyId: post.political_party_id,
           partyName: post.political_party_name,
           created_at: post.created_at
-        }),
-        isOfficial: false,
-        category: 'PARTIDO',
-        partyId: post.political_party_id,
-        partyName: post.political_party_name,
-        created_at: post.created_at
-      }));
+        };
+        
+        return {
+          ...baseNewsItem,
+          image: generateNewsImage(baseNewsItem) // Generar imagen aquí
+        };
+      });
 
       // Combinar y ordenar por fecha (más recientes primero)
       const combinedNews = [...adminNews, ...politicalNews].sort((a, b) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
 
-      setAllNews(combinedNews);
-      setFilteredNews(combinedNews);
+      // Verificación final: asegurar que todas las noticias tengan imagen
+      const verifiedNews = combinedNews.map(news => {
+        if (!news.image || news.image.trim() === '') {
+          return {
+            ...news,
+            image: news.isOfficial ? OFFICIAL_IMAGES[0] : ELECTION_IMAGES[0] // Imagen por defecto apropiada
+          };
+        }
+        return news;
+      });
+
+      setAllNews(verifiedNews);
+      setFilteredNews(verifiedNews);
       
     } catch (error) {
       console.error('Error cargando noticias:', error);
