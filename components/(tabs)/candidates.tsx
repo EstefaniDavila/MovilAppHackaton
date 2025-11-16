@@ -1,27 +1,23 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Image,
-    Platform,
-    StyleSheet,
-    TouchableOpacity,
-    View,
-    ActivityIndicator
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { Colors } from '../../constants/colors';
+import partidosData, { PartidoPolitico } from '../../data/partidos';
 import { ThemedText } from '../themed-text';
 import { ThemedView } from '../themed-view';
-import partidosData from '../../data/partidos.json'; // Importar el JSON
 
-// Interface basada en la nueva estructura JSON
-interface PoliticalParty {
-  name: string;
-  president: string;
-  logo: string | null;
-  propuestas: string[];
-  planes: string[];
-}
+// Importa tu imagen local de aforo - AJUSTA LA RUTA SEGÚN TU PROYECTO
+import aforoImage from '../../assets/images/CuyPresidente.jpeg';
 
 // Función para generar color basado en el nombre del partido
 const generatePartyColor = (partyName: string): string => {
@@ -80,19 +76,12 @@ const CARD_GAP = 16;
 const SPACER = (width - CARD_WIDTH) / 2;
 
 interface CandidateCardProps {
-  party: PoliticalParty;
+  party: PartidoPolitico;
   scrollX?: Animated.Value;
   index?: number;
-  onViewProposals: (party: PoliticalParty) => void;
-  onViewPlan: (party: PoliticalParty) => void;
+  onViewProposals: (party: PartidoPolitico) => void;
+  onViewPlan: (party: PartidoPolitico) => void;
 }
-
-// Función para generar foto del candidato basado en el nombre
-const generateCandidatePhoto = (candidateName: string, partyName: string): string => {
-  const text = candidateName?.split(' ').map(n => n[0]).join('') || 
-               partyName.split(' ').map(n => n[0]).join('').substring(0, 2);
-  return `https://placehold.co/300x400/666666/FFFFFF?text=${encodeURIComponent(text)}`;
-};
 
 // Componente para cada tarjeta de candidato/partido
 const CandidateCard: React.FC<CandidateCardProps> = ({ 
@@ -102,7 +91,6 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   onViewProposals,
   onViewPlan
 }) => {
-  const candidatePhoto = generateCandidatePhoto(party.president, party.name);
   const partyColor = generatePartyColor(party.name);
   const slogan = generateSlogan(party.name);
 
@@ -131,57 +119,46 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
       opacity: opacity || 1,
     }}>
       <View style={styles.card}>
-        {/* Fondo con foto del candidato */}
-        <Image 
-          source={{ uri: candidatePhoto }} 
-          style={styles.candidatePhoto} 
-        />
-        
-        {/* Overlay con gradiente */}
-        <View style={[styles.photoOverlay, { backgroundColor: partyColor }]} />
-        
-        {/* Header con logo del partido */}
-        <View style={styles.cardHeader}>
-          <View style={[styles.partyLogoContainer, { backgroundColor: Colors.pearl }]}>
-            {party.logo ? (
-              <Image source={{ uri: party.logo }} style={styles.partyLogo} />
-            ) : (
-              <ThemedText style={[styles.partyLogoText, { color: partyColor }]}>
-                {party.name.split(' ').map(word => word[0]).join('').substring(0, 3)}
-              </ThemedText>
-            )}
+        {/* Sección de aforo de votación - MISMA IMAGEN PARA TODOS */}
+        <View style={[styles.aforoContainer, { backgroundColor: partyColor }]}>
+          <Image 
+            source={aforoImage} 
+            style={styles.aforoImage}
+            resizeMode="cover"
+          />
+          <View style={styles.aforoOverlay}>
+            <ThemedText style={styles.aforoTitle}>Aforo de Sufragio</ThemedText>
+            <ThemedText style={styles.aforoSubtitle}>Elecciones 2024</ThemedText>
           </View>
         </View>
         
+        {/* Información del partido */}
         <View style={styles.cardContent}>
-          {/* Información del candidato */}
-          <View style={styles.candidateInfo}>
-            <ThemedText style={styles.candidateName}>
-              {party.president}
-            </ThemedText>
-            <ThemedText style={styles.partyName}>{party.name}</ThemedText>
-            
-            {/* Línea divisora */}
-            <View style={[styles.divider, { backgroundColor: Colors.pearl }]} />
-            
-            <ThemedText style={styles.slogan}>
-              "{slogan}"
-            </ThemedText>
-          </View>
+          <ThemedText style={styles.partyName}>{party.name}</ThemedText>
+          <ThemedText style={styles.candidateName}>
+            {party.president}
+          </ThemedText>
+          
+          {/* Línea divisora */}
+          <View style={[styles.divider, { backgroundColor: partyColor }]} />
+          
+          <ThemedText style={styles.slogan}>
+            "{slogan}"
+          </ThemedText>
 
           {/* Botones de acción */}
           <View style={styles.actionsContainer}>
             <TouchableOpacity 
-              style={[styles.actionButton, styles.proposalsButton, { backgroundColor: partyColor }]}
+              style={[styles.actionButton, { backgroundColor: partyColor }]}
               onPress={() => onViewProposals(party)}
             >
               <ThemedText style={styles.actionButtonText}>
-                Ver Propuestas ({party.propuestas.length})
+                Propuestas ({party.propuestas.length})
               </ThemedText>
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.actionButton, styles.planButton, { borderColor: partyColor }]}
+              style={[styles.actionButton, { borderColor: partyColor, backgroundColor: Colors.pearl }]}
               onPress={() => onViewPlan(party)}
             >
               <ThemedText style={[styles.actionButtonText, { color: partyColor }]}>
@@ -198,9 +175,99 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   );
 };
 
+// Componente Modal para Propuestas
+const PropuestasModal: React.FC<{
+  visible: boolean;
+  party: PartidoPolitico | null;
+  onClose: () => void;
+}> = ({ visible, party, onClose }) => {
+  if (!party) return null;
+
+  const partyColor = generatePartyColor(party.name);
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <ThemedView style={styles.modalContainer}>
+        <View style={styles.modalHeader}>
+          <ThemedText style={styles.modalTitle}>Propuestas</ThemedText>
+          <ThemedText style={styles.modalSubtitle}>{party.name}</ThemedText>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <ThemedText style={styles.closeButtonText}>✕</ThemedText>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={styles.modalContent}>
+          <View style={[styles.sectionHeader, { backgroundColor: partyColor }]}>
+            <ThemedText style={styles.sectionTitle}>
+              Principales Propuestas ({party.propuestas.length})
+            </ThemedText>
+          </View>
+          
+          {party.propuestas.map((propuesta, index) => (
+            <View key={index} style={styles.listItem}>
+              <View style={[styles.bullet, { backgroundColor: partyColor }]} />
+              <ThemedText style={styles.listText}>{propuesta}</ThemedText>
+            </View>
+          ))}
+        </ScrollView>
+      </ThemedView>
+    </Modal>
+  );
+};
+
+// Componente Modal para Plan de Gobierno
+const PlanModal: React.FC<{
+  visible: boolean;
+  party: PartidoPolitico | null;
+  onClose: () => void;
+}> = ({ visible, party, onClose }) => {
+  if (!party) return null;
+
+  const partyColor = generatePartyColor(party.name);
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <ThemedView style={styles.modalContainer}>
+        <View style={styles.modalHeader}>
+          <ThemedText style={styles.modalTitle}>Plan de Gobierno</ThemedText>
+          <ThemedText style={styles.modalSubtitle}>{party.name}</ThemedText>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <ThemedText style={styles.closeButtonText}>✕</ThemedText>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={styles.modalContent}>
+          <View style={[styles.sectionHeader, { backgroundColor: partyColor }]}>
+            <ThemedText style={styles.sectionTitle}>
+              Planes de Gobierno ({party.planes.length})
+            </ThemedText>
+          </View>
+          
+          {party.planes.map((plan, index) => (
+            <View key={index} style={styles.listItem}>
+              <View style={[styles.bullet, { backgroundColor: partyColor }]} />
+              <ThemedText style={styles.listText}>{plan}</ThemedText>
+            </View>
+          ))}
+        </ScrollView>
+      </ThemedView>
+    </Modal>
+  );
+};
+
 interface CandidatesScreenProps {
-  onViewProposals?: (party: PoliticalParty) => void;
-  onViewPlan?: (party: PoliticalParty) => void;
+  onViewProposals?: (party: PartidoPolitico) => void;
+  onViewPlan?: (party: PartidoPolitico) => void;
 }
 
 export default function CandidatesScreen({ 
@@ -209,25 +276,27 @@ export default function CandidatesScreen({
 }: CandidatesScreenProps) {
   const scrollX = useRef(new Animated.Value(0)).current;
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [parties, setParties] = useState<PoliticalParty[]>([]);
+  const [parties, setParties] = useState<PartidoPolitico[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Estados para modales
+  const [propuestasModalVisible, setPropuestasModalVisible] = useState(false);
+  const [planModalVisible, setPlanModalVisible] = useState(false);
+  const [selectedParty, setSelectedParty] = useState<PartidoPolitico | null>(null);
 
-  // Cargar datos del JSON
+  // Cargar datos desde el archivo TypeScript
   useEffect(() => {
     const loadParties = () => {
       try {
-        // Usar los datos del JSON importado
-        setParties(partidosData as PoliticalParty[]);
+        setParties(partidosData);
         setLoading(false);
-        
-        console.log(`✅ Cargados ${partidosData.length} partidos desde JSON`);
+        console.log(`✅ Cargados ${partidosData.length} partidos desde TypeScript`);
       } catch (error) {
-        console.error('Error cargando datos del JSON:', error);
+        console.error('Error cargando datos:', error);
         setLoading(false);
       }
     };
 
-    // Simular un pequeño delay para mejor UX
     const timer = setTimeout(() => {
       loadParties();
     }, 800);
@@ -236,15 +305,10 @@ export default function CandidatesScreen({
   }, []);
 
   // Agregar elementos espaciadores al inicio y final para centrado
-  const DATA_WITH_SPACERS: (PoliticalParty & { id: string; isSpacer?: boolean })[] = parties.length > 0 
+  const DATA_WITH_SPACERS: ((PartidoPolitico & { id: string }) | { id: string; isSpacer: boolean })[] = parties.length > 0 
     ? [
         { 
           id: 'left-spacer', 
-          name: '', 
-          president: '', 
-          logo: null, 
-          propuestas: [], 
-          planes: [], 
           isSpacer: true 
         },
         ...parties.map((party, index) => ({
@@ -253,11 +317,6 @@ export default function CandidatesScreen({
         })),
         { 
           id: 'right-spacer', 
-          name: '', 
-          president: '', 
-          logo: null, 
-          propuestas: [], 
-          planes: [], 
           isSpacer: true 
         }
       ]
@@ -275,18 +334,26 @@ export default function CandidatesScreen({
     }
   );
 
-  const handleViewProposals = (party: PoliticalParty) => {
-    console.log('🔍 Ver propuestas de:', party.president);
-    console.log('🏛️ Partido:', party.name);
-    console.log('📋 Propuestas:', party.propuestas);
+  const handleViewProposals = (party: PartidoPolitico) => {
+    setSelectedParty(party);
+    setPropuestasModalVisible(true);
     onViewProposals?.(party);
   };
 
-  const handleViewPlan = (party: PoliticalParty) => {
-    console.log('📊 Ver plan de gobierno de:', party.president);
-    console.log('🏛️ Partido:', party.name);
-    console.log('🗓️ Plan:', party.planes);
+  const handleViewPlan = (party: PartidoPolitico) => {
+    setSelectedParty(party);
+    setPlanModalVisible(true);
     onViewPlan?.(party);
+  };
+
+  const closePropuestasModal = () => {
+    setPropuestasModalVisible(false);
+    setSelectedParty(null);
+  };
+
+  const closePlanModal = () => {
+    setPlanModalVisible(false);
+    setSelectedParty(null);
   };
 
   // Pantalla de carga
@@ -331,7 +398,7 @@ export default function CandidatesScreen({
             Partidos Políticos 2024
           </ThemedText>
           <ThemedText style={styles.subtitle}>
-            Conoce a los candidatos, sus propuestas y planes de gobierno
+            Conoce los partidos, sus candidatos y planes de gobierno
           </ThemedText>
           <View style={styles.offlineBadge}>
             <ThemedText style={styles.offlineBadgeText}>
@@ -360,10 +427,10 @@ export default function CandidatesScreen({
         <Animated.FlatList
           data={DATA_WITH_SPACERS}
           renderItem={({ item, index }) => (
-            item.isSpacer ? 
+            'isSpacer' in item && item.isSpacer ? 
               <View style={{ width: SPACER - CARD_GAP }} /> :
               <CandidateCard 
-                party={item as PoliticalParty} 
+                party={item as PartidoPolitico} 
                 scrollX={scrollX}
                 index={index}
                 onViewProposals={handleViewProposals}
@@ -406,6 +473,19 @@ export default function CandidatesScreen({
           Desliza para explorar {parties.length} partidos
         </ThemedText>
       </View>
+
+      {/* Modales */}
+      <PropuestasModal
+        visible={propuestasModalVisible}
+        party={selectedParty}
+        onClose={closePropuestasModal}
+      />
+      
+      <PlanModal
+        visible={planModalVisible}
+        party={selectedParty}
+        onClose={closePlanModal}
+      />
     </ThemedView>
   );
 }
@@ -538,108 +618,94 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.lightGray,
   },
-  candidatePhoto: {
-    ...StyleSheet.absoluteFillObject,
-    resizeMode: 'cover',
-  },
-  photoOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.75,
-  },
-  cardHeader: {
-    padding: 20,
-    alignItems: 'flex-start',
-  },
-  partyLogoContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
+  // Nuevos estilos para la sección de aforo
+  aforoContainer: {
+    height: 200,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 8,
-    shadowColor: Colors.night,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  partyLogo: {
-    width: 44,
-    height: 44,
-    resizeMode: 'contain',
+  aforoImage: {
+    width: '50%',
+    height: '100%',
+    opacity: 0.8,
   },
-  partyLogoText: {
-    fontSize: 16,
+  aforoOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  aforoTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
+    color: Colors.pearl,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  aforoSubtitle: {
+    fontSize: 16,
+    color: Colors.pearl,
+    textAlign: 'center',
+    fontWeight: '600',
   },
   cardContent: {
     flex: 1,
     padding: 24,
     justifyContent: 'space-between',
   },
-  candidateInfo: {
-    alignItems: 'flex-start',
-    marginTop: 20,
+  partyName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.night,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   candidateName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.pearl,
-    marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 6,
-  },
-  partyName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.pearl,
-    marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.6)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4,
+    color: Colors.gray,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   divider: {
-    width: 50,
+    width: 60,
     height: 3,
     borderRadius: 2,
     marginBottom: 16,
-    opacity: 0.9,
+    alignSelf: 'center',
   },
   slogan: {
-    fontSize: 16,
-    color: Colors.pearl,
+    fontSize: 14,
+    color: Colors.gray,
     fontStyle: 'italic',
-    lineHeight: 22,
-    textShadowColor: 'rgba(0, 0, 0, 0.6)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: 20,
   },
   actionsContainer: {
     gap: 12,
   },
   actionButton: {
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
     shadowColor: Colors.night,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  proposalsButton: {
-    // Estilos específicos para el botón de propuestas
-  },
-  planButton: {
-    backgroundColor: Colors.pearl,
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
     borderWidth: 2,
   },
   actionButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.pearl,
   },
   cardBorder: {
     position: 'absolute',
@@ -691,5 +757,75 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.gray,
     fontWeight: '500',
+  },
+  // Estilos para modales
+  modalContainer: {
+    flex: 1,
+    backgroundColor: Colors.pearl,
+  },
+  modalHeader: {
+    padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.night,
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: Colors.gray,
+    textAlign: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 60 : 40,
+    right: 20,
+    padding: 8,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: Colors.night,
+    fontWeight: 'bold',
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  sectionHeader: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.pearl,
+    textAlign: 'center',
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
+  },
+  bullet: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginTop: 6,
+    marginRight: 12,
+  },
+  listText: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.night,
+    lineHeight: 22,
   },
 });
