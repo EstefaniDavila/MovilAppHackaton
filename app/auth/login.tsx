@@ -28,76 +28,9 @@ export default function LoginScreen() {
     setLoading(true);
     setErrorMsg('');
 
-    // =========================================================
-    // 🧪 INICIO DE SIMULACIÓN PARA PRUEBAS (AJUSTADO A TU ESTRUCTURA) 🧪
-    // Usa 'frank1', 'frank2' con password '123'
-    // =========================================================
-    if (password === '123' && (document === 'frank1' || document === 'frank2')) {
-      let role_member_key = null;
-
-      if (document === 'frank1') {
-        role_member_key = 'citizen';
-      } else if (document === 'frank2') {
-        role_member_key = 'mesa_member';
-      }
-
-      if (role_member_key) {
-        
-        // Simular un retraso de red
-        await new Promise((resolve) => setTimeout(resolve, 800));
-
-        const data = {
-          access_token: 'fake-access-token-123',
-          refresh_token: 'fake-refresh-token-123',
-          user: {
-            email: `${document}@test.com`,
-            roleable_type: 'Member',
-            roleable: {
-              role_member: role_member_key,
-            },
-          },
-        };
-
-        await SecureStore.setItemAsync('access_token', data.access_token);
-        await SecureStore.setItemAsync('refresh_token', data.refresh_token);
-        await SecureStore.setItemAsync('user', JSON.stringify(data.user));
-
-        if (keepLoggedIn) {
-          await SecureStore.setItemAsync('keep_logged_in', 'true');
-        }
-
-        setLoading(false);
-
-        // LÓGICA DE REDIRECCIÓN BASADA EN LA SIMULACIÓN
-        const user = data.user;
-        
-        const memberRole = user.roleable?.role_member; // Sub-rol del Miembro
-        
-        switch (memberRole) {
-          case 'citizen':
-            // ✅ Redirige a la carpeta del rol (que mostrará las tabs y su contenido específico)
-            router.replace('/(citizen)');
-            break;
-          case 'mesa_member':
-            // ✅ Redirige a la carpeta del rol
-            router.replace('/(mesa-member)');
-            break;
-          default:
-            // Fallback si el rol no se reconoce
-            router.replace('/auth/login');
-            break;
-        }
-        return; // IMPORTANTE: Termina la función aquí para evitar la llamada a la API real
-      }
-    }
-    // =========================================================
-    //  FIN DE SIMULACIÓN PARA PRUEBAS 
-    // =========================================================
-
-
-    // ➜ INICIO DEL CÓDIGO REAL DE LA API
     try {
-      const response = await fetch("http://10.0.2.2:3000/api/v1/general/users/sign_in", {
+      const API_URL = process.env.EXPO_PUBLIC_API_URL;
+      const response = await fetch(`${API_URL}/api/v1/general/users/sign_in`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -116,11 +49,12 @@ export default function LoginScreen() {
         return;
       }
 
+      // Guardar tokens y datos del usuario
       await SecureStore.setItemAsync("access_token", data.access_token);
       await SecureStore.setItemAsync("refresh_token", data.refresh_token);
       await SecureStore.setItemAsync("user", JSON.stringify(data.user));
 
-      // ➜ Guardar flag si marcó "mantener sesión"
+      // Guardar flag si marcó "mantener sesión"
       if (keepLoggedIn) {
         await SecureStore.setItemAsync("keep_logged_in", "true");
       }
@@ -132,27 +66,34 @@ export default function LoginScreen() {
       // ----------------------------------------------------------------------
       const user = data.user;
 
-      const memberRole = user.roleable?.role_member; // Sub-rol del Miembro
+      // Usar member_role directamente desde la respuesta de la API
+      const memberRole = user.member_role;
 
       switch (memberRole) {
-          case 'citizen':
-              router.replace('/(citizen)'); 
-              break;
-          case 'mesa_member':
-              router.replace('/(mesa-member)');
-              break;
-          default:
-              // Fallback si el rol no se reconoce
-              router.replace('/auth/login');
-              break;
+        case 'citizen':
+          router.replace('/(citizen)'); 
+          break;
+        case 'mesa_member':
+          router.replace('/(mesa-member)');
+          break;
+        default:
+          // Fallback si el rol no se reconoce
+          router.replace('/auth/login');
+          break;
       }
       // ----------------------------------------------------------------------
       
     } catch (error) {
       setLoading(false);
-      setErrorMsg("Error de conexión");
+      setErrorMsg("Error de conexión. Verifica tu conexión a internet.");
       console.log("Login error:", error);
     }
+  }
+
+  // Función para modo offline - navega directamente a la pantalla de ciudadano
+  function handleOfflineMode() {
+    console.log('🔌 Modo offline activado');
+    router.replace('/(modoofline)');
   }
 
   return (
@@ -172,13 +113,15 @@ export default function LoginScreen() {
 
             {/* Formulario */}
             <View style={styles.form}>
-              <Text style={styles.label}>Usuario</Text>
+              <Text style={styles.label}>Documento</Text>
               <TextInput
                 placeholder="Ingresa tu documento"
                 value={document}
                 onChangeText={setDocument}
                 style={styles.input}
                 placeholderTextColor={Colors.gray}
+                autoCapitalize="none"
+                autoCorrect={false}
               />
 
               <Text style={styles.label}>Contraseña</Text>
@@ -189,6 +132,8 @@ export default function LoginScreen() {
                 onChangeText={setPassword}
                 style={styles.input}
                 placeholderTextColor={Colors.gray}
+                autoCapitalize="none"
+                autoCorrect={false}
               />
 
               {/* Mantener sesión */}
@@ -209,6 +154,16 @@ export default function LoginScreen() {
                 ) : (
                   <Text style={styles.buttonText}>Iniciar sesión</Text>
                 )}
+              </TouchableOpacity>
+
+              {/* Botón de modo offline */}
+              <TouchableOpacity 
+                style={[styles.offlineButton, loading && styles.buttonDisabled]} 
+                onPress={handleOfflineMode} 
+                disabled={loading}
+              >
+                <Text style={styles.offlineButtonText}>📱 Modo Offline</Text>
+                <Text style={styles.offlineButtonSubtext}>Acceder sin conexión</Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => router.push('/auth/register')}>
@@ -321,7 +276,7 @@ const styles = StyleSheet.create({
     borderRadius: 12, 
     paddingVertical: 16, 
     alignItems: 'center', 
-    marginBottom: 16,
+    marginBottom: 12,
     elevation: 4,
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 2 },
@@ -336,6 +291,32 @@ const styles = StyleSheet.create({
     color: Colors.pearl, 
     fontWeight: 'bold', 
     fontSize: 16,
+  },
+  // Estilos para el botón de modo offline
+  offlineButton: { 
+    backgroundColor: Colors.pearl, 
+    borderRadius: 12, 
+    paddingVertical: 14, 
+    alignItems: 'center', 
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    elevation: 2,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  offlineButtonText: { 
+    color: Colors.primary, 
+    fontWeight: 'bold', 
+    fontSize: 16,
+    marginBottom: 2,
+  },
+  offlineButtonSubtext: { 
+    color: Colors.gray, 
+    fontSize: 12,
+    fontWeight: '500',
   },
   link: { 
     textAlign: 'center', 

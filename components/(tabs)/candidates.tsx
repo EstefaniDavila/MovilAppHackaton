@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
     Animated,
     Dimensions,
@@ -6,83 +6,93 @@ import {
     Platform,
     StyleSheet,
     TouchableOpacity,
-    View
+    View,
+    ActivityIndicator
 } from 'react-native';
 import { Colors } from '../../constants/colors';
 import { ThemedText } from '../themed-text';
 import { ThemedView } from '../themed-view';
+import partidosData from '../../data/partidos.json'; // Importar el JSON
+
+// Interface basada en la nueva estructura JSON
+interface PoliticalParty {
+  name: string;
+  president: string;
+  logo: string | null;
+  propuestas: string[];
+  planes: string[];
+}
+
+// Función para generar color basado en el nombre del partido
+const generatePartyColor = (partyName: string): string => {
+  const colors = [
+    Colors.primary,
+    '#2E86AB',
+    '#A23B72',
+    '#F18F01',
+    '#C73E1D',
+    '#3BB273',
+    '#7768AE',
+    '#FF6B6B',
+    '#4ECDC4',
+    '#45B7D1',
+    '#FFA62B',
+    '#8FBC94',
+    '#C44536',
+    '#6A0572',
+    '#1A936F'
+  ];
+  
+  const hash = partyName.split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+  
+  return colors[Math.abs(hash) % colors.length];
+};
+
+// Función para generar slogan basado en el nombre del partido
+const generateSlogan = (partyName: string): string => {
+  const slogans = [
+    "Por un Perú mejor",
+    "Juntos hacia el futuro",
+    "La fuerza del cambio",
+    "Unidos por el progreso",
+    "Trabajo y desarrollo",
+    "Innovación y tradición",
+    "Justicia y equidad",
+    "Libertad y responsabilidad",
+    "Patria y progreso",
+    "Educación y valores"
+  ];
+  
+  const hash = partyName.split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+  
+  return slogans[Math.abs(hash) % slogans.length];
+};
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.78;
 const CARD_GAP = 16;
 const SPACER = (width - CARD_WIDTH) / 2;
 
-// Interfaces TypeScript
-interface Party {
-  id: string;
-  name: string;
-  candidate: string;
-  slogan: string;
-  partyLogo: string;
-  candidatePhoto: string;
-  color: string;
-  isSpacer?: boolean;
-}
-
 interface CandidateCardProps {
-  party: Party;
+  party: PoliticalParty;
   scrollX?: Animated.Value;
   index?: number;
-  onViewProposals: (party: Party) => void;
-  onViewPlan: (party: Party) => void;
+  onViewProposals: (party: PoliticalParty) => void;
+  onViewPlan: (party: PoliticalParty) => void;
 }
 
-// Datos simulados de partidos y candidatos con fotos realistas
-const MOCK_PARTIES: Party[] = [
-  {
-    id: '1',
-    name: 'Partido Esperanza Ciudadana',
-    candidate: 'Dra. María Fernández',
-    slogan: 'Un futuro brillante para todos.',
-    partyLogo: 'https://placehold.co/100x100/D70026/FFFFFF?text=PEC',
-    candidatePhoto: 'https://placehold.co/300x400/D70026/FFFFFF?text=María+Fernández',
-    color: Colors.primary,
-  },
-  {
-    id: '2',
-    name: 'Alianza por el Progreso',
-    candidate: 'Ing. Juan Pérez',
-    slogan: 'Trabajo y desarrollo para la nación.',
-    partyLogo: 'https://placehold.co/100x100/000B29/FFFFFF?text=APP',
-    candidatePhoto: 'https://placehold.co/300x400/000B29/FFFFFF?text=Juan+Pérez',
-    color: Colors.night,
-  },
-  {
-    id: '3',
-    name: 'Movimiento Unión Democrática',
-    candidate: 'Lic. Laura García',
-    slogan: 'La voz del pueblo, nuestra fuerza.',
-    partyLogo: 'https://placehold.co/100x100/EDB83D/000000?text=MUD',
-    candidatePhoto: 'https://placehold.co/300x400/EDB83D/000000?text=Laura+García',
-    color: Colors.secondary,
-  },
-  {
-    id: '4',
-    name: 'Frente Joven',
-    candidate: 'Sr. Carlos Ruiz',
-    slogan: 'Innovación y nuevas ideas.',
-    partyLogo: 'https://placehold.co/100x100/808080/FFFFFF?text=FJ',
-    candidatePhoto: 'https://placehold.co/300x400/808080/FFFFFF?text=Carlos+Ruiz',
-    color: Colors.gray,
-  },
-];
-
-// Agregar elementos espaciadores al inicio y final para centrado
-const DATA_WITH_SPACERS: Party[] = [
-  { id: 'left-spacer', isSpacer: true } as Party,
-  ...MOCK_PARTIES,
-  { id: 'right-spacer', isSpacer: true } as Party
-];
+// Función para generar foto del candidato basado en el nombre
+const generateCandidatePhoto = (candidateName: string, partyName: string): string => {
+  const text = candidateName?.split(' ').map(n => n[0]).join('') || 
+               partyName.split(' ').map(n => n[0]).join('').substring(0, 2);
+  return `https://placehold.co/300x400/666666/FFFFFF?text=${encodeURIComponent(text)}`;
+};
 
 // Componente para cada tarjeta de candidato/partido
 const CandidateCard: React.FC<CandidateCardProps> = ({ 
@@ -92,9 +102,9 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   onViewProposals,
   onViewPlan
 }) => {
-  if (party.isSpacer) {
-    return <View style={{ width: SPACER - CARD_GAP }} />;
-  }
+  const candidatePhoto = generateCandidatePhoto(party.president, party.name);
+  const partyColor = generatePartyColor(party.name);
+  const slogan = generateSlogan(party.name);
 
   // Animación para la tarjeta centrada
   const inputRange = [
@@ -123,62 +133,135 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
       <View style={styles.card}>
         {/* Fondo con foto del candidato */}
         <Image 
-          source={{ uri: party.candidatePhoto }} 
+          source={{ uri: candidatePhoto }} 
           style={styles.candidatePhoto} 
         />
         
         {/* Overlay con gradiente */}
-        <View style={[styles.photoOverlay, { backgroundColor: party.color }]} />
+        <View style={[styles.photoOverlay, { backgroundColor: partyColor }]} />
         
         {/* Header con logo del partido */}
         <View style={styles.cardHeader}>
           <View style={[styles.partyLogoContainer, { backgroundColor: Colors.pearl }]}>
-            <Image source={{ uri: party.partyLogo }} style={styles.partyLogo} />
+            {party.logo ? (
+              <Image source={{ uri: party.logo }} style={styles.partyLogo} />
+            ) : (
+              <ThemedText style={[styles.partyLogoText, { color: partyColor }]}>
+                {party.name.split(' ').map(word => word[0]).join('').substring(0, 3)}
+              </ThemedText>
+            )}
           </View>
         </View>
         
         <View style={styles.cardContent}>
           {/* Información del candidato */}
           <View style={styles.candidateInfo}>
-            <ThemedText style={styles.candidateName}>{party.candidate}</ThemedText>
+            <ThemedText style={styles.candidateName}>
+              {party.president}
+            </ThemedText>
             <ThemedText style={styles.partyName}>{party.name}</ThemedText>
             
             {/* Línea divisora */}
             <View style={[styles.divider, { backgroundColor: Colors.pearl }]} />
             
-            <ThemedText style={styles.slogan}>"{party.slogan}"</ThemedText>
+            <ThemedText style={styles.slogan}>
+              "{slogan}"
+            </ThemedText>
           </View>
 
           {/* Botones de acción */}
           <View style={styles.actionsContainer}>
             <TouchableOpacity 
-              style={[styles.actionButton, styles.proposalsButton, { backgroundColor: party.color }]}
+              style={[styles.actionButton, styles.proposalsButton, { backgroundColor: partyColor }]}
               onPress={() => onViewProposals(party)}
             >
-              <ThemedText style={styles.actionButtonText}>Ver Propuestas</ThemedText>
+              <ThemedText style={styles.actionButtonText}>
+                Ver Propuestas ({party.propuestas.length})
+              </ThemedText>
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.actionButton, styles.planButton, { borderColor: party.color }]}
+              style={[styles.actionButton, styles.planButton, { borderColor: partyColor }]}
               onPress={() => onViewPlan(party)}
             >
-              <ThemedText style={[styles.actionButtonText, { color: party.color }]}>
-                Plan de Gobierno
+              <ThemedText style={[styles.actionButtonText, { color: partyColor }]}>
+                Plan de Gobierno ({party.planes.length})
               </ThemedText>
             </TouchableOpacity>
           </View>
         </View>
         
         {/* Borde inferior decorativo */}
-        <View style={[styles.cardBorder, { backgroundColor: party.color }]} />
+        <View style={[styles.cardBorder, { backgroundColor: partyColor }]} />
       </View>
     </Animated.View>
   );
 };
 
-export default function CandidatesScreen() {
+interface CandidatesScreenProps {
+  onViewProposals?: (party: PoliticalParty) => void;
+  onViewPlan?: (party: PoliticalParty) => void;
+}
+
+export default function CandidatesScreen({ 
+  onViewProposals, 
+  onViewPlan 
+}: CandidatesScreenProps) {
   const scrollX = useRef(new Animated.Value(0)).current;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [parties, setParties] = useState<PoliticalParty[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar datos del JSON
+  useEffect(() => {
+    const loadParties = () => {
+      try {
+        // Usar los datos del JSON importado
+        setParties(partidosData as PoliticalParty[]);
+        setLoading(false);
+        
+        console.log(`✅ Cargados ${partidosData.length} partidos desde JSON`);
+      } catch (error) {
+        console.error('Error cargando datos del JSON:', error);
+        setLoading(false);
+      }
+    };
+
+    // Simular un pequeño delay para mejor UX
+    const timer = setTimeout(() => {
+      loadParties();
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Agregar elementos espaciadores al inicio y final para centrado
+  const DATA_WITH_SPACERS: (PoliticalParty & { id: string; isSpacer?: boolean })[] = parties.length > 0 
+    ? [
+        { 
+          id: 'left-spacer', 
+          name: '', 
+          president: '', 
+          logo: null, 
+          propuestas: [], 
+          planes: [], 
+          isSpacer: true 
+        },
+        ...parties.map((party, index) => ({
+          ...party,
+          id: `party-${index}`
+        })),
+        { 
+          id: 'right-spacer', 
+          name: '', 
+          president: '', 
+          logo: null, 
+          propuestas: [], 
+          planes: [], 
+          isSpacer: true 
+        }
+      ]
+    : [];
 
   const onScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { x: scrollX } } }],
@@ -192,15 +275,52 @@ export default function CandidatesScreen() {
     }
   );
 
-  const handleViewProposals = (party: Party) => {
-    console.log('Ver propuestas de:', party.candidate);
-    // Aquí puedes navegar a la pantalla de propuestas o mostrar modal
+  const handleViewProposals = (party: PoliticalParty) => {
+    console.log('🔍 Ver propuestas de:', party.president);
+    console.log('🏛️ Partido:', party.name);
+    console.log('📋 Propuestas:', party.propuestas);
+    onViewProposals?.(party);
   };
 
-  const handleViewPlan = (party: Party) => {
-    console.log('Ver plan de gobierno de:', party.candidate);
-    // Aquí puedes navegar a la pantalla del plan o mostrar modal
+  const handleViewPlan = (party: PoliticalParty) => {
+    console.log('📊 Ver plan de gobierno de:', party.president);
+    console.log('🏛️ Partido:', party.name);
+    console.log('🗓️ Plan:', party.planes);
+    onViewPlan?.(party);
   };
+
+  // Pantalla de carga
+  if (loading) {
+    return (
+      <ThemedView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <ThemedText style={styles.loadingText}>
+          Cargando partidos políticos...
+        </ThemedText>
+        <ThemedText style={styles.offlineText}>
+          Datos locales cargados
+        </ThemedText>
+      </ThemedView>
+    );
+  }
+
+  // Pantalla sin datos
+  if (parties.length === 0) {
+    return (
+      <ThemedView style={styles.emptyContainer}>
+        <ThemedText style={styles.emptyTitle}>No hay partidos políticos</ThemedText>
+        <ThemedText style={styles.emptyText}>
+          No se encontraron partidos políticos en la base de datos.
+        </ThemedText>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={() => window.location.reload()}
+        >
+          <ThemedText style={styles.retryButtonText}>Reintentar</ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -208,22 +328,27 @@ export default function CandidatesScreen() {
       <View style={styles.header}>
         <View style={styles.titleSection}>
           <ThemedText type="title" style={styles.mainTitle}>
-            Candidatos 2024
+            Partidos Políticos 2024
           </ThemedText>
           <ThemedText style={styles.subtitle}>
-            Conoce a los candidatos y sus propuestas para el futuro
+            Conoce a los candidatos, sus propuestas y planes de gobierno
           </ThemedText>
+          <View style={styles.offlineBadge}>
+            <ThemedText style={styles.offlineBadgeText}>
+              📱 Datos Locales - {parties.length} partidos cargados
+            </ThemedText>
+          </View>
         </View>
 
         {/* Indicador de progreso */}
         <View style={styles.progressIndicator}>
-          {MOCK_PARTIES.map((party, index) => (
+          {parties.map((party, index) => (
             <View 
               key={index}
               style={[
                 styles.progressDot,
                 currentIndex === index && styles.progressDotActive,
-                currentIndex === index && { backgroundColor: party.color }
+                currentIndex === index && { backgroundColor: generatePartyColor(party.name) }
               ]}
             />
           ))}
@@ -235,13 +360,15 @@ export default function CandidatesScreen() {
         <Animated.FlatList
           data={DATA_WITH_SPACERS}
           renderItem={({ item, index }) => (
-            <CandidateCard 
-              party={item} 
-              scrollX={scrollX}
-              index={index}
-              onViewProposals={handleViewProposals}
-              onViewPlan={handleViewPlan}
-            />
+            item.isSpacer ? 
+              <View style={{ width: SPACER - CARD_GAP }} /> :
+              <CandidateCard 
+                party={item as PoliticalParty} 
+                scrollX={scrollX}
+                index={index}
+                onViewProposals={handleViewProposals}
+                onViewPlan={handleViewPlan}
+              />
           )}
           keyExtractor={(item) => item.id}
           horizontal
@@ -258,10 +385,13 @@ export default function CandidatesScreen() {
       {/* Información del candidato actual */}
       <View style={styles.currentInfo}>
         <ThemedText style={styles.currentInfoText}>
-          {currentIndex + 1} de {MOCK_PARTIES.length}
+          {currentIndex + 1} de {parties.length}
         </ThemedText>
         <ThemedText style={styles.currentCandidateText}>
-          {MOCK_PARTIES[currentIndex]?.candidate}
+          {parties[currentIndex]?.president}
+        </ThemedText>
+        <ThemedText style={styles.currentPartyText}>
+          {parties[currentIndex]?.name}
         </ThemedText>
       </View>
 
@@ -273,7 +403,7 @@ export default function CandidatesScreen() {
           <View style={[styles.scrollDot, { backgroundColor: Colors.primary }]} />
         </View>
         <ThemedText style={styles.scrollText}>
-          Desliza para explorar
+          Desliza para explorar {parties.length} partidos
         </ThemedText>
       </View>
     </ThemedView>
@@ -285,6 +415,56 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.pearl,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.pearl,
+    paddingHorizontal: 24,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: Colors.gray,
+    textAlign: 'center',
+  },
+  offlineText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.pearl,
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.night,
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: Colors.gray,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  retryButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: Colors.pearl,
+    fontWeight: '600',
+    fontSize: 16,
   },
   header: {
     paddingHorizontal: 24,
@@ -305,6 +485,19 @@ const styles = StyleSheet.create({
     color: Colors.gray,
     textAlign: 'center',
     lineHeight: 22,
+    marginBottom: 12,
+  },
+  offlineBadge: {
+    backgroundColor: Colors.lightGray,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignSelf: 'center',
+  },
+  offlineBadgeText: {
+    fontSize: 12,
+    color: Colors.night,
+    fontWeight: '600',
   },
   progressIndicator: {
     flexDirection: 'row',
@@ -375,6 +568,10 @@ const styles = StyleSheet.create({
     height: 44,
     resizeMode: 'contain',
   },
+  partyLogoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   cardContent: {
     flex: 1,
     padding: 24,
@@ -397,7 +594,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.pearl,
-    marginBottom: 16,
+    marginBottom: 8,
     textShadowColor: 'rgba(0, 0, 0, 0.6)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
@@ -466,6 +663,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.night,
     fontWeight: '700',
+  },
+  currentPartyText: {
+    fontSize: 14,
+    color: Colors.gray,
+    fontWeight: '500',
+    marginTop: 2,
+    textAlign: 'center',
   },
   scrollIndicator: {
     alignItems: 'center',

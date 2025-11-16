@@ -1,0 +1,352 @@
+[
+  {
+    "name": "ACCION POPULAR",
+    "president": "JULIO ABRAHAM CHAVEZ CHIONG",
+    "logo": "../assets/images/AccionPopular.jpg",
+    "propuestas": ["Doctrina constitucional", "Institucionalidad democrática", "Tradición republicana"],
+    "planes": ["Plan Doctrina Constitucional", "Institucionalidad Democrática", "Tradición Republicana"]
+  },
+  {
+    "name": "ADELANTE PUEBLO UNIDO",
+    "president": "Andrés Ruiz",
+    "logo": "../assets/images/adelantepasbloandino.webp",
+    "propuestas": ["Poder popular organizado", "Democracia directa", "Control comunitario"],
+    "planes": ["Plan Poder Popular Organizado", "Democracia Directa", "Control Comunitario"]
+  },
+  {
+    "name": "AHORA NACION - AN",
+    "president": "Freddy Ronald Chiroque Vigo",
+    "logo": "../assets/images/alvoransdoru.webp",
+    "propuestas": ["Urgencia climática", "Generación renovable", "Adaptación ambiental"],
+    "planes": ["Plan Urgencia Climática", "Generación Renovable", "Adaptación Ambiental"]
+  },
+  {
+    "name": "ALIANZA PARA EL PROGRESO",
+    "president": "Cesar Acuña Peralta",
+    "logo": "../assets/images/ailantaparadiprogreso.webp",
+    "propuestas": ["Educación superior masiva", "Ciencia e investigación", "Innovación productiva"],
+    "planes": ["Plan Educación Superior Masiva", "Ciencia e Investigación", "Innovación Productiva"]
+  },
+  {
+    "name": "AVANZA PAIS",
+    "president": "Juan Alberto Sanchez Perez",
+    "logo": "../assets/images/avantapais.webp",
+    "propuestas": ["Integración social productiva", "Alianzas público-privadas", "Desarrollo territorial"],
+    "planes": ["Plan Integración Social Productiva", "Alianzas Público-Privadas", "Desarrollo Territorial"]
+  },
+  {
+    "name": "PARTIDO APRISTA PERUANO",
+    "president": "Enrique Torres",
+    "logo": "../assets/images/apra.webp",
+    "propuestas": ["Justicia social histórica", "Desarrollo con dignidad", "Doctrina humanista"],
+    "planes": ["Plan Justicia Social", "Desarrollo con Dignidad", "Doctrina Humanista"]
+  },
+  {
+    "name": "BATALLA PERU",
+    "president": "Andrés Flores",
+    "logo": "../assets/images/paridopolis.webp",
+    "propuestas": ["Lucha contra pobreza", "Combate desigualdad", "Guerra a corrupción"],
+    "planes": ["Plan Lucha contra Pobreza", "Combate Desigualdad", "Guerra a Corrupción"]
+  },
+  {
+    "name": "PARTIDO CIUDADANOS POR EL PERU",
+    "president": "Carlos Flores",
+    "logo": "../assets/images/cuidaderooperreliperu.webp",
+    "propuestas": ["Ciudadanía activa", "Control vecinal", "Espacios públicos dignos"],
+    "planes": ["Plan Ciudadanía Activa", "Control Vecinal", "Espacios Públicos Dignos"]
+  },
+  {
+    "name": "COMUNIDAD POLITICA INKA PERU",
+    "president": "Jorge Vargas",
+    "logo": "../assets/images/comunidadpoliticainkaperu.webp",
+    "propuestas": ["Cosmovisión andina", "Saberes ancestrales", "Estado plurinacional"],
+    "planes": ["Plan Cosmovisión Andina", "Saberes Ancestrales", "Estado Plurinacional"]
+  },
+  {
+    "name": "FE EN EL PERU",
+    "president": "Rosa Navarro",
+    "logo": "../assets/images/hemeiperu.webp",
+    "propuestas": ["Valores espirituales", "Ética pública", "Fe como motor social"],
+    "planes": ["Plan Valores Espirituales", "Ética Pública", "Fe como Motor Social"]
+  },
+  {
+    "name": "FRENTE POPULAR AGRICOLA",
+    "president": "Mario López",
+    "logo": "../assets/images/trepap.webp",
+    "propuestas": ["Revolución agropecuaria", "Seguridad alimentaria", "Agricultura familiar tecnificada"],
+    "planes": ["Plan Revolución Agropecuaria", "Seguridad Alimentaria", "Agricultura Familiar Tecnificada"]
+  },
+  {
+    "name": "PARTIDO POLITICO FUERZA MODERNA",
+    "president": "Jorge Ramírez",
+    "logo": "../assets/images/fuerzamodema.webp",
+    "propuestas": ["Infraestructura de calidad", "Logística nacional integrada", "Conectividad multimodal"],
+    "planes": ["Plan Infraestructura de Calidad", "Logística Nacional Integrada", "Conectividad Multimodal"]
+  },
+  {
+    "name": "FUERZA POPULAR",
+    "president": "Mario Chávez",
+    "logo": "../assets/images/fuerzamodema.webp",
+    "propuestas": ["Orden y seguridad", "Inversión privada protegida", "Crecimiento económico estable"],
+    "planes": ["Plan Orden y Seguridad", "Inversión Privada Protegida", "Crecimiento Económico Estable"]
+  },
+  {
+    "name": "PARTIDO POLITICO INTEGRIDAD DEMOCRATICA",
+    "president": "Daniela Rodríguez",
+    "logo": "../assets/images/integridadelemocratica.webp",
+    "propuestas": ["Transparencia total", "Fiscalización ciudadana", "Elecciones internas abiertas"],
+    "planes": ["Plan Transparencia Total", "Fiscalización Ciudadana", "Elecciones Internas Abiertas"]
+  },
+  {
+    "name": "JUNTOS POR EL PERU",
+    "president": "Pedro Rojas",
+    "logo": "../assets/images/juntoperreliperu.webp",
+    "propuestas": ["Unidad nacional", "Concertación plural", "Soluciones pactadas"],
+    "planes": ["Plan Unidad Nacional", "Concertación Plural", "Soluciones Pactadas"]
+  },
+  {
+    "name": "LIBERTAD POPULAR",
+    "president": "Enrique Díaz",
+    "logo": "../assets/images/libertadpopular.webp",
+    "propuestas": ["Libertades individuales", "Mercado regulado inteligente", "Emprendimiento libre"],
+    "planes": ["Plan Libertades Individuales", "Mercado Regulado Inteligente", "Emprendimiento Libre"]
+  },
+  {
+    "name": "NUEVO PERU POR EL BUEN VIVIR",
+    "president": "Maria Rodríguez",
+    "logo": "../assets/images/nuevogenu.webp",
+    "propuestas": ["Buen vivir constitucional", "Desarrollo alternativo", "Armonía con naturaleza"],
+    "planes": ["Plan Buen Vivir Constitucional", "Desarrollo Alternativo", "Armonía con Naturaleza"]
+  },
+  {
+    "name": "PARTIDO PAIS PARA TODOS",
+    "president": "Enrique Pérez",
+    "logo": "../assets/images/pataparatodos.webp",
+    "propuestas": ["Inclusión social integral", "Discapacidad atendida", "Diversidad respetada"],
+    "planes": ["Plan Inclusión Social Integral", "Discapacidad Atendida", "Diversidad Respetada"]
+  },
+  {
+    "name": "PARTIDO CIVICO OBRAS",
+    "president": "Patricia López",
+    "logo": "../assets/images/partidocrixcodbras.webp",
+    "propuestas": ["Infraestructura pública calidad", "Mantenimiento preventivo", "Inversión técnica"],
+    "planes": ["Plan Infraestructura Pública", "Mantenimiento Preventivo", "Inversión Técnica"]
+  },
+  {
+    "name": "PARTIDO DEL BUEN GOBIERNO",
+    "president": "Jorge Díaz",
+    "logo": "../assets/images/partidedelbuergobierno.webp",
+    "propuestas": ["Gestión eficiente", "Servicio civil meritocrático", "Evaluación de políticas"],
+    "planes": ["Plan Gestión Eficiente", "Servicio Civil Meritocrático", "Evaluación de Políticas"]
+  },
+  {
+    "name": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "president": "Ana Ramírez",
+    "logo": "../assets/images/partidedemocraticosomosperu.webp",
+    "propuestas": ["Desarrollo humano integral", "Capital social", "Tejido asociativo"],
+    "planes": ["Plan Desarrollo Humano Integral", "Capital Social", "Tejido Asociativo"]
+  },
+  {
+    "name": "PARTIDO FRENTE DE LA ESPERANZA 2021",
+    "president": "Enrique Rodríguez",
+    "logo": "../assets/images/partidofremslaesperanza.webp",
+    "propuestas": ["Oportunidades para jóvenes", "Reinserción social", "Segunda oportunidades laborales"],
+    "planes": ["Plan Oportunidades Jóvenes", "Reinserción Social", "Segundas Oportunidades Laborales"]
+  },
+  {
+    "name": "PARTIDO MORADO",
+    "president": "Sofia Gonzales",
+    "logo": "../assets/images/partidomorado.webp",
+    "propuestas": ["Legalización cannabis medicinal", "Matrimonio igualitario", "Estado laico fortalecido"],
+    "planes": ["Plan Cannabis Medicinal", "Matrimonio Igualitario", "Estado Laico Fortalecido"]
+  },
+  {
+    "name": "PARTIDO PATRIOTICO DEL PERU",
+    "president": "Lucia Díaz",
+    "logo": "../assets/images/partidopatrioticopenu.webp",
+    "propuestas": ["Defensa de símbolos patrios", "Historia nacional en currícula", "Heroísmo civil reconocido"],
+    "planes": ["Plan Símbolos Patrios", "Historia Nacional en Educación", "Reconocimiento al Heroísmo Civil"]
+  },
+  {
+    "name": "PARTIDO POLITICO TODO CON EL PUEBLO",
+    "president": "Daniel Gonzales",
+    "logo": "../assets/images/partidopoliticosociomeeru.webp",
+    "propuestas": ["Consulta popular vinculante", "Presupuestos participativos", "Rendición de cuentas"],
+    "planes": ["Plan Democracia Participativa", "Presupuestos Participativos", "Rendición de Cuentas Permanente"]
+  },
+  {
+    "name": "PARTIDO POLITICO PUEBLO CONSCIENTE",
+    "president": "Manuel Salazar",
+    "logo": "../assets/images/partidopoliticosoproderne.webp",
+    "propuestas": ["Educación crítica ciudadana", "Consumo responsable", "Participación vecinal"],
+    "planes": ["Plan Educación Ciudadana", "Consumo Responsable Nacional", "Participación Vecinal Activa"]
+  },
+  {
+    "name": "PARTIDO POLITICO NACIONAL PERU LIBRE",
+    "president": "Jorge Morales",
+    "logo": "../assets/images/partidopoliticosonacionalperulhe.webp",
+    "propuestas": ["Economía planificada social", "Nacionalización minera", "Reforma agraria integral"],
+    "planes": ["Plan Economía Social", "Nacionalización Minera Estratégica", "Reforma Agraria Integral"]
+  },
+  {
+    "name": "PARTIDO POLITICO PERU PRIMERO",
+    "president": "Jorge Castillo",
+    "logo": "../assets/images/partidopoliticoperquimeno.webp",
+    "propuestas": ["Interés nacional en relaciones internacionales", "Defensa de soberanía", "Desarrollo autónomo"],
+    "planes": ["Plan Soberanía Nacional", "Relaciones Internacionales Estratégicas", "Desarrollo Autónomo"]
+  },
+  {
+    "name": "PARTIDO POLITICO POPULAR VOCES DEL PUEBLO",
+    "president": "Miguel Sánchez",
+    "logo": "../assets/images/partidopoliticopopulivocosedipueblo.webp",
+    "propuestas": ["Cabildos abiertos mensuales", "Iniciativa legislativa popular", "Revocatoria facilitada"],
+    "planes": ["Plan Cabildos Abiertos", "Iniciativa Legislativa Popular", "Revocatoria Facilitada"]
+  },
+  {
+    "name": "PARTIDO POLITICO PRIN",
+    "president": "Daniel Pérez",
+    "logo": "../assets/images/partidopolitizoptiu.webp",
+    "propuestas": ["Innovación pública", "Gestión por resultados", "Simplificación administrativa"],
+    "planes": ["Plan Innovación Pública", "Gestión por Resultados", "Simplificación Administrativa"]
+  },
+  {
+    "name": "PARTIDO POLITICO PERUANOS UNIDOS",
+    "president": "Lucia Rojas",
+    "logo": "../assets/images/partidopoliticosomodibres.webp",
+    "propuestas": ["Identidad nacional fortalecida", "Integración regional", "Patriotismo constructivo"],
+    "planes": ["Plan Identidad Nacional", "Integración Regional", "Patriotismo Constructivo"]
+  },
+  {
+    "name": "PARTIDO POLITICO TODO CON EL PUEBLO",
+    "president": "Daniel Gonzales",
+    "logo": "../assets/images/partidopoliticosotoconeipueblo.webp",
+    "propuestas": ["Consulta popular vinculante", "Presupuestos participativos", "Rendición de cuentas"],
+    "planes": ["Plan Democracia Participativa", "Presupuestos Participativos", "Rendición de Cuentas Permanente"]
+  },
+  {
+    "name": "PARTIDO POPULAR CRISTIANO - PPC",
+    "president": "Daniela Mendoza",
+    "logo": "../assets/images/partidopopulaicristiano.webp",
+    "propuestas": ["Familia como base social", "Economía social de mercado", "Valores éticos públicos"],
+    "planes": ["Plan Fortalecimiento Familiar", "Economía Social de Mercado", "Valores Éticos Públicos"]
+  },
+  {
+    "name": "PARTIDO POR EL ENTENDIMIENTO NACIONAL",
+    "president": "Enrique Castillo",
+    "logo": "../assets/images/partidoporelentendimienoyunificacion.webp",
+    "propuestas": ["Reconciliación nacional", "Memoria histórica", "Unidad en la diversidad"],
+    "planes": ["Plan Reconciliación Nacional", "Museo de la Memoria", "Unidad en Diversidad"]
+  },
+  {
+    "name": "PARTIDO SICREO",
+    "president": "Enrique Paredes",
+    "logo": "../assets/images/partidosiores.webp",
+    "propuestas": ["Crédito agropecuario seguro", "Riego tecnificado", "Comercio justo rural"],
+    "planes": ["Plan Agropecuario Nacional", "Riego Tecnificado Masivo", "Comercio Justo Rural"]
+  },
+  {
+    "name": "PARTIDO UNIDAD Y PAZ",
+    "president": "Lucia Navarro",
+    "logo": "../assets/images/partido.unidoypsz.webp",
+    "propuestas": ["Mediación de conflictos sociales", "Cultura de paz educativa", "Diálogo nacional permanente"],
+    "planes": ["Plan Nacional de Diálogo", "Educación para la Paz", "Mediación Comunitaria"]
+  },
+  {
+    "name": "PARTIDO DEMOCRATA VERDE",
+    "president": "Daniel Salazar",
+    "logo": "../assets/images/partidoverda.webp",
+    "propuestas": ["Transición ecológica justa", "Impuesto carbono", "Protección biodiversidad"],
+    "planes": ["Plan Transición Ecológica", "Impuesto Carbono", "Protección Biodiversidad"]
+  },
+  {
+    "name": "PARTIDO POLITICO ADP",
+    "president": "Ricardo Flores",
+    "logo": "../assets/images/petidopoliticoadip.webp",
+    "propuestas": ["Descentralización real", "Autonomía regional", "Financiamiento territorial"],
+    "planes": ["Plan Descentralización Real", "Autonomía Regional", "Financiamiento Territorial"]
+  },
+  {
+    "name": "PARTIDO DEMOCRATICO FEDERAL",
+    "president": "Ricardo Navarro",
+    "logo": "../assets/images/perudemocraticofederal.webp",
+    "propuestas": ["Federalismo progresivo", "Regiones autogobernadas", "Pacto fiscal regional"],
+    "planes": ["Plan Federalismo Progresivo", "Regiones Autogobernadas", "Pacto Fiscal Regional"]
+  },
+  {
+    "name": "PERU MODERNO",
+    "president": "Pedro Pérez",
+    "logo": "../assets/images/perumoderno.webp",
+    "propuestas": ["Transformación digital estatal", "Ciudades 5G", "Inteligencia artificial pública"],
+    "planes": ["Plan Transformación Digital", "Red 5G Nacional", "IA para Desarrollo Nacional"]
+  },
+  {
+    "name": "PODEMOS PERU",
+    "president": "Miguel Ramírez",
+    "logo": "../assets/images/podencoperu.webp",
+    "propuestas": ["Empleo juvenil garantizado", "Internet gratuito nacional", "Deporte masivo escolar"],
+    "planes": ["Plan Primer Empleo Joven", "Internet Nacional Gratuito", "Deporte Escolar Masivo"]
+  },
+  {
+    "name": "PRIMERO LA GENTE",
+    "president": "Carmen Pérez",
+    "logo": "../assets/images/primerologente.webp",
+    "propuestas": ["Economía circular", "Agricultura orgánica", "Conservación de bosques"],
+    "planes": ["Plan Nacional de Economía Circular", "Agricultura Orgánica Sostenible", "Conservación de Bosques Nativos"]
+  },
+  {
+    "name": "PROGRESEMOS",
+    "president": "Rosa Morales",
+    "logo": "../assets/images/progresemos.webp",
+    "propuestas": ["Energías renovables masivas", "Transporte eléctrico público", "Ciudades inteligentes"],
+    "planes": ["Plan Energía Limpia 2030", "Transporte Eléctrico Nacional", "Ciudades Inteligentes Perú"]
+  },
+  {
+    "name": "PARTIDO DE LOS TRABAJADORES",
+    "president": "Mario Vargas",
+    "logo": "../assets/images/pteperu.webp",
+    "propuestas": ["Salario digno universal", "Derechos laborales ampliados", "Economía del cuidado"],
+    "planes": ["Plan Salario Digno Universal", "Derechos Laborales Ampliados", "Economía del Cuidado"]
+  },
+  {
+    "name": "RENOVACION POPULAR",
+    "president": "Rosa Pérez",
+    "logo": "../assets/images/renovacionpopular.webp",
+    "propuestas": ["Pensión universal adulto mayor", "Créditos educativos blandos", "Infraestructura deportiva nacional"],
+    "planes": ["Plan Dignidad Adulto Mayor", "Crédito Educativo Nacional", "Deporte para Todos"]
+  },
+  {
+    "name": "RESURGIMIENTO UNIDO NACIONAL - RUNA",
+    "president": "Carmen Ruiz",
+    "logo": "../assets/images/resurgimientosnudosacional.webp",
+    "propuestas": ["Revaloración cultural indígena", "Turismo comunitario", "Medicina tradicional integrativa"],
+    "planes": ["Plan Nacional de Cultura Viva", "Rutas Turísticas Comunitarias", "Salud Intercultural"]
+  },
+  {
+    "name": "SALVEMOS AL PERU",
+    "president": "Andrés Gonzales",
+    "logo": "../assets/images/salvemooperu.webp",
+    "propuestas": ["Mano dura contra la corrupción", "Fortalecimiento de las FFAA", "Protección de fronteras"],
+    "planes": ["Plan Seguridad Nacional", "Fortalecimiento Fronterizo", "Ley Anticorrupción Estricta"]
+  },
+  {
+    "name": "UN CAMINO DIFERENTE",
+    "president": "Pedro Mendoza",
+    "logo": "../assets/images/uncaminodiferente.webp",
+    "propuestas": ["Reforma política integral", "Gobierno digital transparente", "Incentivos a pymes"],
+    "planes": ["Plan Anticorrupción Total", "Gobierno Digital 100%", "Ley PYME Nacional"]
+  },
+  {
+    "name": "UP UNIDAD POPULAR",
+    "president": "Miguel Vargas",
+    "logo": "../assets/images/unidadpopular.webp",
+    "propuestas": ["Reducción de la jornada laboral", "Nacionalización de recursos estratégicos", "Vivienda social gratuita"],
+    "planes": ["Programa Nacional de Vivienda Social", "Reforma Laboral Progresista", "Ley de Soberanía Nacional"]
+  },
+  {
+    "name": "VISION PERU",
+    "president": "Luis Gonzales",
+    "logo": "../assets/images/velooperu.webp",
+    "propuestas": ["Inversión en tecnología educativa", "Modernización del sector salud", "Fomento a startups nacionales"],
+    "planes": ["Plan Digital Nacional 2025", "Modernización Hospitalaria Integral", "Ley de Innovación Tecnológica"]
+  }
+]
