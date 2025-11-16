@@ -1,3 +1,4 @@
+// app/(mesa-member)/_layout.tsx
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -7,7 +8,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export default function TabLayout() {
+export default function MesaMemberTabLayout() {
   const colorScheme = useColorScheme();
 
   return (
@@ -42,14 +43,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="calendar"
+        name="calender"
         options={{
           title: 'Calendario',
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
               <IconSymbol 
                 size={24} 
-                name="calendar.circle.fill" 
+                name="calendar" 
                 color={focused ? Colors.pearl : color} 
               />
             </View>
@@ -65,6 +66,36 @@ export default function TabLayout() {
               <IconSymbol 
                 size={24} 
                 name="person.3.fill" 
+                color={focused ? Colors.pearl : color} 
+              />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="filtercandidates"
+        options={{
+          title: 'Búsqueda',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
+              <IconSymbol 
+                size={24} 
+                name="magnifyingglass"
+                color={focused ? Colors.pearl : color} 
+              />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="homework"
+        options={{
+          title: 'Tareas',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
+              <IconSymbol 
+                size={24} 
+                name="list.bullet.clipboard.fill"
                 color={focused ? Colors.pearl : color} 
               />
             </View>
@@ -90,6 +121,7 @@ export default function TabLayout() {
   );
 }
 
+// Reutilizar los mismos estilos
 const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',

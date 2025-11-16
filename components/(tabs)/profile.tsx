@@ -28,9 +28,6 @@ export default function ProfileScreen() {
     router.push("/auth/change-password");
   }
 
-  function goAdminPanel() {
-    router.push("/admin");
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -104,19 +101,6 @@ export default function ProfileScreen() {
               </View>
               <ThemedText style={styles.buttonArrow}>→</ThemedText>
             </TouchableOpacity>
-
-            {role === 'admin' && (
-              <TouchableOpacity 
-                onPress={goAdminPanel} 
-                style={[styles.button, styles.adminButton]}
-              >
-                <View style={styles.buttonContent}>
-                  <ThemedText style={styles.buttonIcon}>⚙️</ThemedText>
-                  <ThemedText style={styles.buttonText}>Panel de administración</ThemedText>
-                </View>
-                <ThemedText style={styles.buttonArrow}>→</ThemedText>
-              </TouchableOpacity>
-            )}
 
             <View style={styles.divider} />
 

@@ -1,37 +1,56 @@
 {
   "expo": {
-    "name": "MovilAppHackaton",
-    "slug": "MovilAppHackaton",
+    // ======================
+    // CONFIGURACIÓN BÁSICA
+    // ======================
+    "name": "",
+    "slug": "yachay-votu",
     "version": "1.0.0",
+    "scheme": "yachayvotu",
+
+    // ======================
+    // APARIENCIA E INTERFAZ
+    // ======================
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "movilapphackaton",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/images/logoyachay1.png",
+
+    // ======================
+    // ARQUITECTURA Y RENDIMIENTO
+    // ======================
     "newArchEnabled": true,
+
+    // ======================
+    // CONFIGURACIÓN POR PLATAFORMA
+    // ======================
     "ios": {
       "supportsTablet": true
     },
+
     "android": {
-      "package": "com.movilapphackaton.app",
+      "package": "com.yachayvotu.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/logoyachay1.png",
+        "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
+
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/logoyachay1.png"
     },
+
+    // ======================
+    // PLUGINS Y EXTENSIONES
+    // ======================
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/logoyachay1.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -42,6 +61,10 @@
       ],
       "expo-secure-store"
     ],
+
+    // ======================
+    // EXPERIMENTOS Y CARACTERÍSTICAS AVANZADAS
+    // ======================
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

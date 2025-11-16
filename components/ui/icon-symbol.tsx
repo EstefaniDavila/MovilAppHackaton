@@ -23,12 +23,37 @@ const MAPPING = {
   'message.fill': 'chat',
   'person.crop.circle.fill': 'person',
   
-  // ÍCONOS AGREGADOS PARA CALENDARIO Y CANDIDATOS
-  'calendar': 'event', // Para Calendario
-  'calendar.circle.fill': 'event-note', // Alternativa para Calendario
-  'person.3.fill': 'groups', // Para Candidatos
-  'people.fill': 'group', // Alternativa para Candidatos
-  'account.box.fill': 'account-box', // Otra alternativa
+  // ÍCONOS CORREGIDOS PARA CALENDARIO
+  'calendar': 'event',
+  'calendar.circle.fill': 'event', // Cambiado de 'event-note' a 'event'
+  'calendar.fill': 'event', // Alternativa adicional
+  
+  // ÍCONOS PARA CANDIDATOS
+  'person.3.fill': 'groups',
+  'people.fill': 'group',
+  'account.box.fill': 'account-box',
+  
+  // LUPA DE BÚSQUEDA
+  'magnifyingglass': 'search',
+  'magnifyingglass.circle': 'search',
+  'magnifyingglass.circle.fill': 'search',
+  
+  // ÍCONOS PARA VOTACIÓN
+  'checkmark.square.fill': 'check-box',
+  'checkmark.circle.fill': 'check-circle',
+  'how.to.vote': 'how-to-vote',
+  'ballot': 'ballot',
+  'hand.raised.fill': 'pan-tool',
+  'flag.fill': 'flag',
+  'chart.bar.fill': 'bar-chart',
+  
+  // ÍCONOS PARA HOMEWORK
+  'list.bullet.clipboard.fill': 'assignment',
+  'checklist': 'checklist',
+  'doc.text.fill': 'description',
+  'note.text': 'note',
+  'task': 'task',
+  'assignment': 'assignment',
 } as IconMapping;
 
 /**

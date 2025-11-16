@@ -1,17 +1,16 @@
 import React, { useRef, useState } from 'react';
-import { 
-  StyleSheet, 
-  FlatList, 
-  TouchableOpacity, 
-  Image, 
-  Dimensions, 
-  Platform, 
-  View,
-  Animated 
+import {
+    Animated,
+    Dimensions,
+    Image,
+    Platform,
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import { ThemedText } from '../../components/themed-text';
-import { ThemedView } from '../../components/themed-view';
-import { Colors } from '../../constants/colors'; 
+import { Colors } from '../../constants/colors';
+import { ThemedText } from '../themed-text';
+import { ThemedView } from '../themed-view';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.78;

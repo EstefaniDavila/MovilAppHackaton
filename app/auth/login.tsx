@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -29,20 +30,15 @@ export default function LoginScreen() {
 
     // =========================================================
     // 🧪 INICIO DE SIMULACIÓN PARA PRUEBAS (AJUSTADO A TU ESTRUCTURA) 🧪
-    // Usa 'frank1', 'frank2', 'frank3' con password '123'
+    // Usa 'frank1', 'frank2' con password '123'
     // =========================================================
-    if (password === '123' && (document === 'frank1' || document === 'frank2' || document === 'frank3' || document === 'admin')) {
+    if (password === '123' && (document === 'frank1' || document === 'frank2')) {
       let role_member_key = null;
 
       if (document === 'frank1') {
         role_member_key = 'citizen';
       } else if (document === 'frank2') {
         role_member_key = 'mesa_member';
-      } else if (document === 'frank3') {
-        role_member_key = 'party_representative';
-      } else if (document === 'admin') {
-        // Simulación para probar el ADMIN
-        role_member_key = 'ADMIN';
       }
 
       if (role_member_key) {
@@ -55,10 +51,9 @@ export default function LoginScreen() {
           refresh_token: 'fake-refresh-token-123',
           user: {
             email: `${document}@test.com`,
-            roleable_type: role_member_key === 'ADMIN' ? 'Admin' : 'Member',
+            roleable_type: 'Member',
             roleable: {
-              // Aseguramos que solo los miembros tengan el sub-rol
-              role_member: role_member_key === 'ADMIN' ? undefined : role_member_key,
+              role_member: role_member_key,
             },
           },
         };
@@ -76,35 +71,27 @@ export default function LoginScreen() {
         // LÓGICA DE REDIRECCIÓN BASADA EN LA SIMULACIÓN
         const user = data.user;
         
-        if (user.roleable_type === 'Admin' || role_member_key === 'ADMIN') {
-          router.replace('/(admin)');
-        } else {
-          const memberRole = user.roleable?.role_member; // Sub-rol del Miembro
-          
-          switch (memberRole) {
-            case 'citizen':
-              // ✅ Redirige a la carpeta del rol (que mostrará las tabs y su contenido específico)
-              router.replace('/(member)/citizen');
-              break;
-            case 'mesa_member':
-              // ✅ Redirige a la carpeta del rol
-              router.replace('/(member)/mesa-member');
-              break;
-            case 'party_representative':
-              // ✅ Redirige a la carpeta del rol
-              router.replace('/(member)/party-representative');
-              break;
-            default:
-              // Fallback si el rol no se reconoce
-              router.replace('/(tabs)');
-              break;
-          }
+        const memberRole = user.roleable?.role_member; // Sub-rol del Miembro
+        
+        switch (memberRole) {
+          case 'citizen':
+            // ✅ Redirige a la carpeta del rol (que mostrará las tabs y su contenido específico)
+            router.replace('/(citizen)');
+            break;
+          case 'mesa_member':
+            // ✅ Redirige a la carpeta del rol
+            router.replace('/(mesa-member)');
+            break;
+          default:
+            // Fallback si el rol no se reconoce
+            router.replace('/auth/login');
+            break;
         }
         return; // IMPORTANTE: Termina la función aquí para evitar la llamada a la API real
       }
     }
     // =========================================================
-    //  FIN DE SIMULACIÓN PARA PRUEBAS 
+    //  FIN DE SIMULACIÓN PARA PRUEBAS 
     // =========================================================
 
 
@@ -145,26 +132,19 @@ export default function LoginScreen() {
       // ----------------------------------------------------------------------
       const user = data.user;
 
-      if (user.roleable_type === 'Admin' || user.role_type === 'ADMIN') {
-          router.replace('/(admin)');
-      } else {
-          const memberRole = user.roleable?.role_member; // Sub-rol del Miembro
+      const memberRole = user.roleable?.role_member; // Sub-rol del Miembro
 
-          switch (memberRole) {
-              case 'citizen':
-                  router.replace('/(member)/citizen'); 
-                  break;
-              case 'mesa_member':
-                  router.replace('/(member)/mesa-member');
-                  break;
-              case 'party_representative':
-                  router.replace('/(member)/party-representative');
-                  break;
-              default:
-                  // Fallback si el rol no se reconoce
-                  router.replace('/(tabs)');
-                  break;
-          }
+      switch (memberRole) {
+          case 'citizen':
+              router.replace('/(member)/citizen'); 
+              break;
+          case 'mesa_member':
+              router.replace('/(member)/mesa-member');
+              break;
+          default:
+              // Fallback si el rol no se reconoce
+              router.replace('/(tabs)');
+              break;
       }
       // ----------------------------------------------------------------------
       
@@ -177,13 +157,17 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient colors={['#ffffff', '#f3f4f6']} style={styles.gradient}>
+      <LinearGradient colors={[Colors.pearl, Colors.lightGray]} style={styles.gradient}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
           <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
             {/* Título y logo */}
             <Text style={styles.title}>Bienvenido</Text>
             {/* Reemplaza con la ruta de tu logo real */}
-            <Image source={require('@/assets/images/favicon.png')} style={styles.logo} resizeMode="contain" /> 
+            <Image 
+              source={require('../../assets/images/logoyachay.png')} 
+              style={styles.logo} 
+              resizeMode="contain" 
+            /> 
             <Text style={styles.subtitle}>Ingresa tus credenciales</Text>
 
             {/* Formulario */}
@@ -194,6 +178,7 @@ export default function LoginScreen() {
                 value={document}
                 onChangeText={setDocument}
                 style={styles.input}
+                placeholderTextColor={Colors.gray}
               />
 
               <Text style={styles.label}>Contraseña</Text>
@@ -203,6 +188,7 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={setPassword}
                 style={styles.input}
+                placeholderTextColor={Colors.gray}
               />
 
               {/* Mantener sesión */}
@@ -213,9 +199,13 @@ export default function LoginScreen() {
 
               {errorMsg !== '' && <Text style={styles.error}>{errorMsg}</Text>}
 
-              <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+              <TouchableOpacity 
+                style={[styles.button, loading && styles.buttonDisabled]} 
+                onPress={handleLogin} 
+                disabled={loading}
+              >
                 {loading ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={Colors.pearl} />
                 ) : (
                   <Text style={styles.buttonText}>Iniciar sesión</Text>
                 )}
@@ -233,22 +223,124 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  gradient: { flex: 1 },
-  keyboard: { flex: 1 },
-  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 32 },
-  title: { fontSize: 32, fontWeight: 'bold', textAlign: 'center', color: '#1f2937', marginBottom: 8 },
-  logo: { width: 80, height: 80, alignSelf: 'center', marginBottom: 8 },
-  subtitle: { fontSize: 16, textAlign: 'center', color: '#6b7280', marginBottom: 32 },
-  form: { backgroundColor: '#fff', borderRadius: 24, padding: 24, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8 },
-  label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 },
-  input: { backgroundColor: '#f9fafb', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, borderWidth: 1, borderColor: '#e5e7eb', marginBottom: 16 },
-  checkboxContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  checkbox: { width: 18, height: 18, borderRadius: 4, borderWidth: 2, borderColor: '#3b82f6', marginRight: 8 },
-  checked: { backgroundColor: '#3b82f6' },
-  checkboxLabel: { fontSize: 14, color: '#374151' },
-  error: { color: '#ef4444', textAlign: 'center', marginBottom: 12 },
-  button: { backgroundColor: '#3b82f6', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginBottom: 12 },
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  link: { textAlign: 'center', color: '#3b82f6', fontSize: 14 },
+  container: { 
+    flex: 1,
+    backgroundColor: Colors.pearl,
+  },
+  gradient: { 
+    flex: 1,
+  },
+  keyboard: { 
+    flex: 1,
+  },
+  scroll: { 
+    flexGrow: 1, 
+    justifyContent: 'center', 
+    paddingHorizontal: 32,
+  },
+  title: { 
+    fontSize: 32, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    color: Colors.night, 
+    marginBottom: 8,
+  },
+  logo: { 
+    width: 300, 
+    height: 300, 
+    alignSelf: 'center', 
+    marginBottom: 16,
+  },
+  subtitle: { 
+    fontSize: 16, 
+    textAlign: 'center', 
+    color: Colors.gray, 
+    marginBottom: 32,
+    fontWeight: '500',
+  },
+  form: { 
+    backgroundColor: Colors.pearl, 
+    borderRadius: 24, 
+    padding: 24, 
+    elevation: 8,
+    shadowColor: Colors.night,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+  },
+  label: { 
+    fontSize: 14, 
+    fontWeight: '600', 
+    color: Colors.night, 
+    marginBottom: 6,
+  },
+  input: { 
+    backgroundColor: Colors.lightGray + '40', 
+    borderRadius: 12, 
+    paddingHorizontal: 16, 
+    paddingVertical: 14, 
+    fontSize: 16, 
+    borderWidth: 1, 
+    borderColor: Colors.lightGray, 
+    marginBottom: 16,
+    color: Colors.night,
+  },
+  checkboxContainer: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginBottom: 16,
+  },
+  checkbox: { 
+    width: 20, 
+    height: 20, 
+    borderRadius: 6, 
+    borderWidth: 2, 
+    borderColor: Colors.primary, 
+    marginRight: 10,
+    backgroundColor: 'transparent',
+  },
+  checked: { 
+    backgroundColor: Colors.primary,
+  },
+  checkboxLabel: { 
+    fontSize: 14, 
+    color: Colors.night,
+    fontWeight: '500',
+  },
+  error: { 
+    color: Colors.secondary, 
+    textAlign: 'center', 
+    marginBottom: 12,
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  button: { 
+    backgroundColor: Colors.primary, 
+    borderRadius: 12, 
+    paddingVertical: 16, 
+    alignItems: 'center', 
+    marginBottom: 16,
+    elevation: 4,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  buttonDisabled: {
+    backgroundColor: Colors.gray,
+    opacity: 0.7,
+  },
+  buttonText: { 
+    color: Colors.pearl, 
+    fontWeight: 'bold', 
+    fontSize: 16,
+  },
+  link: { 
+    textAlign: 'center', 
+    color: Colors.primary, 
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

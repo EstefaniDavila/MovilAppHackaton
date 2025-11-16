@@ -1,16 +1,18 @@
-import React, { useState, useRef } from 'react';
-import { ScrollView, StyleSheet, View, TouchableOpacity, Animated, Text } from 'react-native';
-import { ThemedText } from '../../components/themed-text';
-import { ThemedView } from '../../components/themed-view';
+import React, { useState } from 'react';
+import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../constants/colors';
+import { ThemedText } from '../themed-text';
+import { ThemedView } from '../themed-view';
 
 // IconSymbol component para los íconos
-const IconSymbol = ({ name, size = 24, color = Colors.night, style }: { 
-  name: string; 
-  size?: number; 
-  color?: string; 
+interface IconSymbolProps {
+  name: string;
+  size?: number;
+  color?: string;
   style?: any;
-}) => {
+}
+
+const IconSymbol: React.FC<IconSymbolProps> = ({ name, size = 24, color = Colors.night, style }) => {
   const icons: { [key: string]: string } = {
     'calendar': '📅',
     'star': '⭐',
@@ -57,11 +59,11 @@ const Collapsible: React.FC<CollapsibleProps> = ({
   children, 
   isFirst = false 
 }) => {
-  const [isExpanded, setIsExpanded] = useState(isFirst);
-  const [animation] = useState(new Animated.Value(isFirst ? 1 : 0));
-  const [contentHeight, setContentHeight] = useState(0);
+  const [isExpanded, setIsExpanded] = useState<boolean>(isFirst);
+  const [animation] = useState<Animated.Value>(new Animated.Value(isFirst ? 1 : 0));
+  const [contentHeight, setContentHeight] = useState<number>(0);
 
-  const toggleCollapsible = () => {
+  const toggleCollapsible = (): void => {
     const toValue = isExpanded ? 0 : 1;
     setIsExpanded(!isExpanded);
     
@@ -260,7 +262,7 @@ const EventItem: React.FC<EventItemProps> = ({ item, index, totalItems }) => (
   </View>
 );
 
-// Componente principal del calendario
+// Componente principal del calendario - CORREGIDO: eliminado : JSX.Element
 export default function CalendarScreen() {
   return (
     <ThemedView style={styles.container}>
@@ -268,6 +270,9 @@ export default function CalendarScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Añadí más espacio en la parte superior */}
+        <View style={styles.topSpacing} />
+        
         {/* Header mejorado */}
         <View style={styles.header}>
           <View style={styles.titleSection}>
@@ -361,7 +366,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingTop: 10,
+    paddingBottom: 20,
+  },
+  // Nuevo estilo para añadir espacio en la parte superior
+  topSpacing: {
+    height: 50, // Ajusta este valor para subir o bajar todo el contenido
   },
   header: {
     marginBottom: 24,

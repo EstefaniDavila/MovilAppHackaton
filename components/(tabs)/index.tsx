@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Image, View, Text } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -18,6 +18,63 @@ interface NewsItem {
 interface NewsCardProps {
   news: NewsItem;
 }
+
+// Componente del Contador
+const CountdownTimer = () => {
+  const [timeLeft, setTimeLeft] = useState({
+    months: 0,
+    days: 0,
+    hours: 0,
+    minutes: 0
+  });
+
+  useEffect(() => {
+    // Fecha objetivo - puedes ajustarla según necesites
+    const targetDate = new Date('2025-04-30T00:00:00').getTime();
+
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference > 0) {
+        const months = Math.floor(difference / (1000 * 60 * 60 * 24 * 30));
+        const days = Math.floor((difference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+
+        setTimeLeft({
+          months,
+          days,
+          hours,
+          minutes
+        });
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 60000); // Actualizar cada minuto
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const TimeUnit = ({ value, label }: { value: number; label: string }) => (
+    <View style={styles.timeUnit}>
+      <ThemedText style={styles.timeValue}>{value.toString().padStart(2, '0')}</ThemedText>
+      <ThemedText style={styles.timeLabel}>{label}</ThemedText>
+    </View>
+  );
+
+  return (
+    <View style={styles.countdownContainer}>
+      <View style={styles.countdownRow}>
+        <TimeUnit value={timeLeft.months} label="Meses" />
+        <TimeUnit value={timeLeft.days} label="Días" />
+        <TimeUnit value={timeLeft.hours} label="Horas" />
+        <TimeUnit value={timeLeft.minutes} label="Minutos" />
+      </View>
+    </View>
+  );
+};
 
 // Datos simulados de noticias mejorados
 const MOCK_NEWS: NewsItem[] = [
@@ -59,7 +116,7 @@ const MOCK_NEWS: NewsItem[] = [
   },
 ];
 
-// Componente Card de Noticia mejorado
+// Componente Card de Noticia mejorado (sin cambios)
 const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
   const getCategoryColor = () => {
     switch (news.category) {
@@ -178,10 +235,9 @@ export default function NewsScreen() {
                 <ThemedText style={styles.newsCounterNumber}>{MOCK_NEWS.length}</ThemedText>
                 <ThemedText style={styles.newsCounterLabel}>noticias</ThemedText>
               </View>
-              <View style={styles.liveIndicator}>
-                <View style={styles.liveDot} />
-                <ThemedText style={styles.liveText}>En vivo</ThemedText>
-              </View>
+              
+              {/* Reemplazamos el liveIndicator por el CountdownTimer */}
+              <CountdownTimer />
             </View>
           </View>
         </View>
@@ -293,27 +349,28 @@ const styles = StyleSheet.create({
     color: Colors.pearl + 'CC',
     fontWeight: '600',
   },
-  liveIndicator: {
-    flexDirection: 'row',
+  // Estilos para el contador
+  countdownContainer: {
     alignItems: 'center',
-    backgroundColor: Colors.primary + '20',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.primary + '40',
   },
-  liveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.primary,
-    marginRight: 6,
+  countdownRow: {
+    flexDirection: 'row',
+    gap: 12,
   },
-  liveText: {
-    fontSize: 14,
+  timeUnit: {
+    alignItems: 'center',
+    minWidth: 50,
+  },
+  timeValue: {
+    fontSize: 20,
+    fontWeight: '800',
     color: Colors.primary,
-    fontWeight: '700',
+    marginBottom: 2,
+  },
+  timeLabel: {
+    fontSize: 12,
+    color: Colors.pearl + 'CC',
+    fontWeight: '600',
   },
   newsList: {
     paddingHorizontal: 20,
